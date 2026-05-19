@@ -124,23 +124,24 @@
         .deep-bullet-list li { position: relative; padding-left: 1.5rem; margin-bottom: 0.75rem; line-height: 1.5; color: #475569; font-size: 0.875rem;}
         .deep-bullet-list li::before { content: '\f0da'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; left: 0; top: 0.1rem; color: #BE9A60; }
         .deep-bullet-list strong { color: #1A1D24; }
-
+        
         /* Smooth Tab Transitions */
         .page-view { display: none; opacity: 0; transform: translateY(10px); transition: all 0.4s ease-out; }
         .page-view.active { display: block; opacity: 1; transform: translateY(0); }
 
-        /* Tooltip Animation */
+        /* Tooltip Animation (Pop Up/Down properly) */
         .tooltip-card {
             visibility: hidden;
             opacity: 0;
-            transform: translateY(10px);
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .group:hover .tooltip-card {
-            visibility: visible;
-            opacity: 1;
-            transform: translateY(0);
-        }
+        /* ถ้าเป็น Tooltip แบบเด้งขึ้น (bottom-full) */
+        .tooltip-up { transform: translateY(10px); }
+        .group:hover .tooltip-up { visibility: visible; opacity: 1; transform: translateY(0); }
+        
+        /* ถ้าเป็น Tooltip แบบเด้งลง (top-full) */
+        .tooltip-down { transform: translateY(-10px); }
+        .group:hover .tooltip-down { visibility: visible; opacity: 1; transform: translateY(0); }
     </style>
 </head>
 <body class="antialiased" id="bodyElement">
@@ -150,7 +151,7 @@
     <div class="blob blob-2"></div>
     <div class="blob blob-3"></div>
 
-    <!-- แก้ไขจาก sticky top-0 เป็น relative เพื่อไม่ให้แบนเนอร์ค้าง ให้มีพื้นที่อ่านเนื้อหา -->
+    <!-- 1. แก้ไขให้แบนเนอร์ไม่ค้าง: ลบ sticky top-0 ออก ใช้ relative -->
     <header class="relative z-40 glass border-b border-white/60 pt-8 pb-4 transition-all shadow-soft">
         <div class="max-w-7xl mx-auto px-6 lg:px-8">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-2">
@@ -206,7 +207,7 @@
                 <!-- COMPACT INFOGRAPHIC OVERVIEW WITH HOVER -->
                 <div id="workflow-infographic" class="relative z-30"></div>
 
-                <!-- Main Blueprint Content (ลด z-index ให้ต่ำกว่า Infographic) -->
+                <!-- Main Blueprint Content (ลด z-index ให้ต่ำกว่า Infographic เพื่อไม่บัง Tooltip) -->
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start relative z-10">
                     <!-- Left Sidebar Nav -->
                     <div class="hidden lg:block lg:col-span-3 sticky top-10">
@@ -617,16 +618,17 @@
                 const enTitle = match ? match[2].trim() : "Phase " + stage.id;
                 const isLast = index === journeyData.length - 1;
 
-                // จัดการเรื่องตำแหน่ง Tooltip ไม่ให้ล้นจอ
-                let tooltipPosClass = "left-1/2 -translate-x-1/2";
-                let arrowPosClass = "left-1/2 -translate-x-1/2";
+                // จัดการ Tooltip ให้อยู่ข้างบนเสมอ เพื่อหนี Grid ล่าง
+                let tooltipPosClass = "left-1/2 -translate-x-1/2 bottom-full mb-4";
+                let arrowPosClass = "left-1/2 -translate-x-1/2 -bottom-2 border-b border-r";
                 
+                // จัดหน้าต่างซ้ายขวาให้ไม่ทะลุจอ
                 if (index === 0) {
-                    tooltipPosClass = "left-0 translate-x-0";
-                    arrowPosClass = "left-8";
+                    tooltipPosClass = "left-0 translate-x-0 bottom-full mb-4";
+                    arrowPosClass = "left-8 -bottom-2 border-b border-r";
                 } else if (index === journeyData.length - 1) {
-                    tooltipPosClass = "right-0 translate-x-0";
-                    arrowPosClass = "right-8";
+                    tooltipPosClass = "right-0 translate-x-0 bottom-full mb-4";
+                    arrowPosClass = "right-8 -bottom-2 border-b border-r";
                 }
 
                 itemsHTML += `
@@ -641,10 +643,10 @@
                         <h4 class="font-ui font-extrabold text-[11px] md:text-xs text-slate-800 text-center leading-tight mb-1 px-1 drop-shadow-sm group-hover:text-brand-700 transition-colors">${enTitle}</h4>
                         <p class="text-[9px] md:text-[10px] text-slate-500 font-medium text-center leading-tight px-1 hidden md:block">${thTitle}</p>
                         
-                        <!-- Tooltip Hover Pop-up -->
-                        <div class="tooltip-card absolute top-full ${tooltipPosClass} mt-4 w-56 sm:w-64 bg-white/95 backdrop-blur-xl p-5 rounded-2xl shadow-xl border border-brand-100 pointer-events-none z-[100]">
+                        <!-- Tooltip Hover Pop-up (เด้งขึ้นบนเสมอ) -->
+                        <div class="tooltip-card tooltip-down absolute ${tooltipPosClass} w-56 sm:w-64 bg-white/95 backdrop-blur-xl p-5 rounded-2xl shadow-xl border border-brand-100 pointer-events-none z-[100]">
                             <!-- Triangle Arrow -->
-                            <div class="absolute -top-2 ${arrowPosClass} w-4 h-4 bg-white border-t border-l border-brand-100 rotate-45"></div>
+                            <div class="absolute ${arrowPosClass} w-4 h-4 bg-white border-brand-100 rotate-45"></div>
                             <div class="relative z-10 text-left">
                                 <h5 class="text-brand-700 font-bold text-[10px] uppercase tracking-widest mb-1 flex items-center"><i class="fa-solid fa-bullseye mr-1.5"></i> เป้าหมายของเฟสนี้</h5>
                                 <p class="text-xs text-slate-700 font-medium mb-3 leading-relaxed">${stage.subtitle}</p>
@@ -843,7 +845,7 @@
             setupScrollSpy();
         }
 
-        // RENDER: Tab 2 (Operations ROI Pitching Dashboard - จัดเรียง 4 คอลัมน์และซ่อนคำอธิบายใน Hover)
+        // RENDER: Tab 2 (Operations ROI Pitching Dashboard - จัดเรียง 4 คอลัมน์และซ่อนคำอธิบายใน Hover แบบชัวร์ๆ)
         function renderROI() {
             const container = document.getElementById('roi-content');
             if(!container) return;
@@ -857,11 +859,12 @@
                     </p>
                 </div>
 
-                <!-- KPI Impact Grid (4 คอลัมน์แถวเดียว พร้อม Tooltip ฐานการคำนวณ) -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
+                <!-- KPI Impact Grid (4 คอลัมน์แถวเดียว พร้อม Tooltip ฐานการคำนวณซ้อนทับตารางด้านล่างได้) -->
+                <!-- ใส่ z-30 เพื่อให้ Tooltip ที่เด้งลงมา ทับ Gantt Chart ด้านล่างได้ -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20 relative z-30">
                     
                     <!-- KPI 1: Lead Time -->
-                    <div class="glass p-6 rounded-3xl border border-white/80 shadow-soft relative overflow-visible bg-white/50 flex flex-col items-center text-center group cursor-pointer hover:bg-white/80 transition-all hover:-translate-y-1">
+                    <div class="glass p-6 rounded-3xl border border-white/80 shadow-soft relative overflow-visible bg-white/50 flex flex-col items-center text-center group cursor-pointer hover:bg-white/80 transition-all z-10 hover:z-50">
                         <!-- ไอคอน Info แจ้งให้รู้ว่าเอาเมาส์ชี้ได้ -->
                         <div class="absolute top-4 right-4 text-sky-300 group-hover:text-sky-500 transition-colors"><i class="fa-solid fa-circle-info"></i></div>
                         
@@ -869,9 +872,10 @@
                         <h4 class="text-4xl font-ui font-extrabold text-slate-800 mb-2">80<span class="text-xl text-slate-500">%</span></h4>
                         <p class="text-[11px] font-bold text-sky-600 uppercase tracking-widest leading-tight">ลดระยะเวลาทำงาน<br/><span class="text-[9px] text-slate-500">(Lead Time)</span></p>
                         
-                        <!-- Hover Tooltip (ฐานการคำนวณ) -->
-                        <div class="tooltip-card absolute top-full left-1/2 -translate-x-1/2 mt-4 w-64 md:w-72 bg-white/95 backdrop-blur-xl p-5 rounded-2xl shadow-xl border border-sky-100 pointer-events-none z-[60]">
-                            <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-t border-l border-sky-100 rotate-45"></div>
+                        <!-- Hover Tooltip (ฐานการคำนวณ) เด้งลงด้านล่าง -->
+                        <div class="tooltip-card tooltip-up absolute top-full lg:left-0 lg:translate-x-0 left-1/2 -translate-x-1/2 mt-4 w-64 sm:w-72 bg-white/95 backdrop-blur-xl p-5 rounded-2xl shadow-xl border border-sky-100 pointer-events-none z-[100]">
+                            <!-- Triangle Arrow -->
+                            <div class="absolute -top-2 lg:left-8 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-t border-l border-sky-100 rotate-45"></div>
                             <div class="relative z-10 text-left">
                                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-calculator mr-1"></i> ฐานการคำนวณ (Basis)</p>
                                 <p class="text-xs text-slate-600 font-light leading-relaxed mb-2">
@@ -885,14 +889,14 @@
                     </div>
 
                     <!-- KPI 2: R&D Waste -->
-                    <div class="glass p-6 rounded-3xl border border-white/80 shadow-soft relative overflow-visible bg-white/50 flex flex-col items-center text-center group cursor-pointer hover:bg-white/80 transition-all hover:-translate-y-1">
+                    <div class="glass p-6 rounded-3xl border border-white/80 shadow-soft relative overflow-visible bg-white/50 flex flex-col items-center text-center group cursor-pointer hover:bg-white/80 transition-all z-10 hover:z-50">
                         <div class="absolute top-4 right-4 text-indigo-300 group-hover:text-indigo-500 transition-colors"><i class="fa-solid fa-circle-info"></i></div>
 
                         <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl shadow-sm border border-indigo-100 mb-4"><i class="fa-solid fa-microscope"></i></div>
                         <h4 class="text-4xl font-ui font-extrabold text-slate-800 mb-2">75<span class="text-xl text-slate-500">%</span></h4>
                         <p class="text-[11px] font-bold text-indigo-600 uppercase tracking-widest leading-tight">ลดของเสียในห้องแล็บ<br/><span class="text-[9px] text-slate-500">(R&D Waste)</span></p>
                         
-                        <div class="tooltip-card absolute top-full left-1/2 -translate-x-1/2 mt-4 w-64 md:w-72 bg-white/95 backdrop-blur-xl p-5 rounded-2xl shadow-xl border border-indigo-100 pointer-events-none z-[60]">
+                        <div class="tooltip-card tooltip-up absolute top-full left-1/2 -translate-x-1/2 mt-4 w-64 sm:w-72 bg-white/95 backdrop-blur-xl p-5 rounded-2xl shadow-xl border border-indigo-100 pointer-events-none z-[100]">
                             <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-t border-l border-indigo-100 rotate-45"></div>
                             <div class="relative z-10 text-left">
                                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-calculator mr-1"></i> ฐานการคำนวณ (Basis)</p>
@@ -907,14 +911,14 @@
                     </div>
 
                     <!-- KPI 3: OEE -->
-                    <div class="glass p-6 rounded-3xl border border-white/80 shadow-soft relative overflow-visible bg-white/50 flex flex-col items-center text-center group cursor-pointer hover:bg-white/80 transition-all hover:-translate-y-1">
+                    <div class="glass p-6 rounded-3xl border border-white/80 shadow-soft relative overflow-visible bg-white/50 flex flex-col items-center text-center group cursor-pointer hover:bg-white/80 transition-all z-10 hover:z-50">
                         <div class="absolute top-4 right-4 text-amber-300 group-hover:text-amber-500 transition-colors"><i class="fa-solid fa-circle-info"></i></div>
 
                         <div class="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl shadow-sm border border-amber-100 mb-4"><i class="fa-solid fa-gears"></i></div>
                         <h4 class="text-4xl font-ui font-extrabold text-slate-800 mb-2">+25<span class="text-xl text-slate-500">%</span></h4>
                         <p class="text-[11px] font-bold text-amber-600 uppercase tracking-widest leading-tight">เพิ่มประสิทธิภาพเครื่องจักร<br/><span class="text-[9px] text-slate-500">(OEE)</span></p>
                         
-                        <div class="tooltip-card absolute top-full left-1/2 -translate-x-1/2 mt-4 w-64 md:w-72 bg-white/95 backdrop-blur-xl p-5 rounded-2xl shadow-xl border border-amber-100 pointer-events-none z-[60]">
+                        <div class="tooltip-card tooltip-up absolute top-full left-1/2 -translate-x-1/2 mt-4 w-64 sm:w-72 bg-white/95 backdrop-blur-xl p-5 rounded-2xl shadow-xl border border-amber-100 pointer-events-none z-[100]">
                             <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-t border-l border-amber-100 rotate-45"></div>
                             <div class="relative z-10 text-left">
                                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-calculator mr-1"></i> ฐานการคำนวณ (Basis)</p>
@@ -929,15 +933,15 @@
                     </div>
 
                     <!-- KPI 4: Zero Defect -->
-                    <div class="glass p-6 rounded-3xl border border-white/80 shadow-soft relative overflow-visible bg-white/50 flex flex-col items-center text-center group cursor-pointer hover:bg-white/80 transition-all hover:-translate-y-1">
+                    <div class="glass p-6 rounded-3xl border border-white/80 shadow-soft relative overflow-visible bg-white/50 flex flex-col items-center text-center group cursor-pointer hover:bg-white/80 transition-all z-10 hover:z-50">
                         <div class="absolute top-4 right-4 text-emerald-300 group-hover:text-emerald-500 transition-colors"><i class="fa-solid fa-circle-info"></i></div>
 
                         <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl shadow-sm border border-emerald-100 mb-4"><i class="fa-solid fa-shield-check"></i></div>
                         <h4 class="text-4xl font-ui font-extrabold text-slate-800 mb-2">0<span class="text-xl text-slate-500">%</span></h4>
                         <p class="text-[11px] font-bold text-emerald-600 uppercase tracking-widest leading-tight">เป้าหมายของเสียเป็นศูนย์<br/><span class="text-[9px] text-slate-500">(Zero Defect)</span></p>
                         
-                        <div class="tooltip-card absolute top-full left-1/2 -translate-x-1/2 mt-4 w-64 md:w-72 bg-white/95 backdrop-blur-xl p-5 rounded-2xl shadow-xl border border-emerald-100 pointer-events-none z-[60]">
-                            <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-t border-l border-emerald-100 rotate-45"></div>
+                        <div class="tooltip-card tooltip-up absolute top-full lg:right-0 lg:left-auto lg:translate-x-0 left-1/2 -translate-x-1/2 mt-4 w-64 sm:w-72 bg-white/95 backdrop-blur-xl p-5 rounded-2xl shadow-xl border border-emerald-100 pointer-events-none z-[100]">
+                            <div class="absolute -top-2 lg:right-8 lg:left-auto left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-t border-l border-emerald-100 rotate-45"></div>
                             <div class="relative z-10 text-left">
                                 <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-calculator mr-1"></i> ฐานการคำนวณ (Basis)</p>
                                 <p class="text-xs text-slate-600 font-light leading-relaxed mb-2">
@@ -952,7 +956,8 @@
                 </div>
 
                 <!-- Strategic Implementation Roadmap (Gantt Chart / Project Timeline) -->
-                <div class="bg-slate-900 rounded-[2.5rem] p-8 md:p-12 shadow-2xl border border-slate-700 relative overflow-hidden">
+                <!-- ให้ส่วนนี้มี z-10 เพื่อยอมให้ Tooltip จากด้านบน ทับลงมาได้แบบไม่ถูกตัด -->
+                <div class="bg-slate-900 rounded-[2.5rem] p-8 md:p-12 shadow-2xl border border-slate-700 relative overflow-hidden z-10">
                     <div class="absolute top-0 right-0 w-[500px] h-[500px] bg-brand-500/10 rounded-full blur-[80px] pointer-events-none"></div>
                     
                     <div class="relative z-10">
