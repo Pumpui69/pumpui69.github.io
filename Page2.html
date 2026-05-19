@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="th" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Revomed: Interactive ERP/CRM Simulation</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Prompt:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Prompt', 'sans-serif'],
+                        ui: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f4ff', 100: '#e0e9ff', 500: '#3b82f6',
+                            600: '#2563eb', 700: '#1d4ed8', 900: '#0f172a', 
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <style>
+        body { 
+            color: #334155; 
+            background-color: #f8fafc;
+            overflow: hidden; /* Prevent body scroll, let the app scroll */
+        }
+
+        /* Ambient Animated Background */
+        .ambient-bg {
+            position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+            background: linear-gradient(135deg, #f8fafc 0%, #eef2ff 50%, #f0fdf4 100%);
+            z-index: -2;
+        }
+        
+        .blob {
+            position: fixed; filter: blur(80px); z-index: -1; opacity: 0.4;
+            animation: moveBlobs 25s infinite alternate cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .blob-1 { top: -10%; left: -10%; width: 50vw; height: 50vw; background: #e0e7ff; }
+        .blob-2 { bottom: -10%; right: -10%; width: 40vw; height: 40vw; background: #dcfce7; animation-delay: -12s; }
+
+        @keyframes moveBlobs {
+            0% { transform: translate(0, 0) scale(1); }
+            100% { transform: translate(5%, 5%) scale(1.1); }
+        }
+        
+        /* Glassmorphism */
+        .glass {
+            background: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.8);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.05);
+        }
+
+        .glass-dark {
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: rgba(203, 213, 225, 0.6); border-radius: 8px; }
+        ::-webkit-scrollbar-thumb:hover { background: rgba(148, 163, 184, 0.8); }
+        
+        .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+        .sidebar-scroll::-webkit-scrollbar-track { background: rgba(15, 23, 42, 0.5); }
+        .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.2); border-radius: 4px; }
+
+        .biz-step { position: relative; padding-left: 1.75rem; margin-bottom: 0.75rem; font-size: 0.875rem; color: #475569;}
+        .biz-step::before { content: '\f058'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; left: 0; top: 0.15rem; color: #10b981; font-size: 1rem; }
+        .biz-step strong { color: #1e293b; }
+
+        /* Animation */
+        @keyframes pulse-fast { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
+        .animate-pulse-fast { animation: pulse-fast 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
+        @keyframes scaleX { 0% { transform: scaleX(0); } 50% { transform: scaleX(1); } 100% { transform: scaleX(0); transform-origin: right; } }
+        
+        /* Focus Mode Styles */
+        #system-interface-panel.focus-active {
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            width: 100vw !important;
+            height: 100vh !important;
+            z-index: 9000 !important;
+            background: rgba(15, 23, 42, 0.85) !important;
+            backdrop-filter: blur(12px) !important;
+            border: none !important;
+            border-radius: 0 !important;
+        }
+        #system-interface-panel.focus-active .header-bar {
+            background: #1e293b !important;
+            color: #f8fafc !important;
+            border-bottom: 1px solid #334155 !important;
+            padding: 1rem 1.5rem !important;
+            font-size: 0.875rem !important; /* text-sm */
+        }
+        #system-interface-panel.focus-active #focus-icon {
+            color: #f8fafc !important;
+            transform: scale(1.2);
+        }
+        #system-interface-panel.focus-active #focus-icon:hover {
+            color: #3b82f6 !important;
+        }
+        
+        /* ป้องกันจอเกินขอบ และปรับระยะขอบ (Padding) ให้อ่านง่าย */
+        #system-interface-panel.focus-active > div.flex-1 {
+            padding: 2.5rem !important; /* ระยะขอบสำหรับจอคอม */
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+        @media (max-width: 768px) {
+            #system-interface-panel.focus-active > div.flex-1 {
+                padding: 1rem !important; /* ระยะขอบสำหรับมือถือ/แท็บเล็ต */
+            }
+        }
+        
+        #system-interface-panel.focus-active #ui-concept-wrapper {
+            max-width: 900px !important;
+            width: 100% !important;
+            height: 100% !important; /* ยืดหดพอดีขอบ Padding 100% ทำให้ไม่ล้นจอ */
+            max-height: 850px !important; /* ป้องกันหน้าจอยืดเกินไปในจอแนวตั้งยาวๆ */
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
+            transition: all 0.3s ease;
+        }
+    </style>
+</head>
+<body class="antialiased">
+
+    <!-- Backgrounds -->
+    <div class="ambient-bg"></div>
+    <div class="blob blob-1"></div>
+    <div class="blob blob-2"></div>
+
+    <!-- Header -->
+    <header class="glass border-b border-white/50 px-6 py-3 flex items-center justify-between shadow-sm shrink-0 relative z-50">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 bg-brand-600 rounded-xl flex items-center justify-center text-white shadow-md">
+                <i class="fa-solid fa-layer-group text-xl"></i>
+            </div>
+            <div>
+                <h1 class="text-xl font-ui font-bold text-slate-900 leading-tight">Revomed Enterprise System</h1>
+                <p class="text-[11px] font-sans text-slate-500 font-medium tracking-wide uppercase">End-to-End Workflow Simulation</p>
+            </div>
+        </div>
+        <div class="hidden md:flex items-center gap-3 text-xs bg-white/60 px-4 py-1.5 rounded-lg border border-slate-200">
+            <span class="relative flex h-2.5 w-2.5 mr-1">
+              <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-emerald-500"></span>
+            </span>
+            <span class="font-ui font-semibold text-slate-700">System Online</span>
+            <span class="text-slate-400 mx-2">|</span>
+            <span class="text-slate-500"><i class="fa-solid fa-calendar-day mr-1"></i> 2026 Ready</span>
+        </div>
+    </header>
+
+    <!-- Main Workspace Area -->
+    <div class="h-[calc(100vh-64px)] w-full max-w-[1600px] mx-auto p-2 sm:p-4 lg:p-6">
+        
+        <!-- Mac-like Window Container -->
+        <div class="glass rounded-2xl shadow-2xl overflow-hidden border border-white/60 flex flex-col h-full w-full">
+            
+            <!-- Window Header -->
+            <div class="bg-white/70 backdrop-blur-lg border-b border-slate-200/50 px-4 py-2.5 flex items-center justify-between shrink-0">
+                <div class="flex space-x-2 w-24">
+                    <div class="w-3 h-3 rounded-full bg-rose-400 shadow-inner"></div>
+                    <div class="w-3 h-3 rounded-full bg-amber-400 shadow-inner"></div>
+                    <div class="w-3 h-3 rounded-full bg-emerald-400 shadow-inner"></div>
+                </div>
+                <div class="flex-1 flex justify-center">
+                    <div class="bg-white/90 border border-slate-200 rounded-md px-8 py-1 text-[11px] font-ui text-slate-500 flex items-center shadow-sm">
+                        <i class="fa-solid fa-lock mr-2 text-slate-400"></i> 
+                        <span class="tracking-wide">workspace.revomed.enterprise</span>
+                    </div>
+                </div>
+                <div class="w-24 flex justify-end">
+                    <div class="text-[10px] font-bold text-slate-600 uppercase tracking-widest px-2.5 py-0.5 bg-slate-200/50 rounded border border-slate-300/50" id="app-user-role">
+                        Role: Select
+                    </div>
+                </div>
+            </div>
+
+            <!-- App Layout -->
+            <div class="flex flex-1 overflow-hidden bg-slate-50/50">
+                
+                <!-- Left Sidebar -->
+                <div class="w-[75px] md:w-64 glass-dark flex flex-col shrink-0 border-r border-slate-800/50 shadow-inner z-20">
+                    <div class="p-4 border-b border-slate-800/50 hidden md:block">
+                        <h3 class="text-white font-ui font-bold text-[10px] uppercase tracking-widest text-slate-400">Customer Journey 7 Steps</h3>
+                    </div>
+                    <div class="flex-1 overflow-y-auto py-2 sidebar-scroll" id="simulator-sidebar-nav">
+                        <!-- Injected via JS -->
+                    </div>
+                </div>
+
+                <!-- Right Main Content Area -->
+                <div class="flex-1 flex flex-col overflow-hidden relative bg-white/40" id="simulator-content-area">
+                    <!-- Dynamic Content Goes Here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- GLOBAL LOADING OVERLAY -->
+    <div id="sim-loading-overlay" class="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[9999] hidden flex-col items-center justify-center text-white transition-opacity">
+        <div class="relative">
+            <i class="fa-solid fa-circle-notch fa-spin text-6xl text-brand-500 drop-shadow-[0_0_15px_rgba(59,130,246,0.8)]"></i>
+            <i class="fa-solid fa-microchip absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 text-xl text-white"></i>
+        </div>
+        <div id="sim-loading-text" class="text-sm font-ui font-bold tracking-widest mt-6 uppercase text-brand-100">Processing Automations...</div>
+        <div class="w-48 h-1 bg-slate-800 rounded-full mt-4 overflow-hidden">
+            <div class="h-full bg-brand-500 w-full origin-left animate-[scaleX_1.2s_ease-in-out_infinite]"></div>
+        </div>
+    </div>
+
+    <!-- RESULT MODAL -->
+    <div id="sim-doc-modal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[9990] hidden items-center justify-center p-4">
+        <div class="bg-white/95 backdrop-blur-xl rounded-2xl shadow-2xl w-full max-w-lg max-h-full overflow-hidden flex flex-col transform transition-transform border border-white/50" id="sim-doc-content">
+            <div class="p-4 border-b border-slate-200/60 flex justify-between items-center bg-slate-50/80 shrink-0">
+                <h4 id="sim-doc-title" class="font-bold text-sm text-slate-800 uppercase tracking-widest"><i class="fa-solid fa-bell mr-2 text-brand-500"></i>System Notification</h4>
+                <button onclick="window.closeSimModal()" class="text-slate-400 hover:text-rose-500 hover:bg-rose-50 w-8 h-8 rounded-full flex items-center justify-center transition-colors"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div id="sim-doc-body" class="p-6 bg-slate-50/50 flex-1 overflow-y-auto custom-scrollbar"></div>
+            <div id="sim-doc-action" class="p-4 border-t border-slate-200/60 bg-white shrink-0"></div>
+        </div>
+    </div>
+
+    <script>
+        // 1. STATE & THEMES
+        window.appState = { simModule: 1, isFocusMode: false };
+        
+        const themes = {
+            blue: { borderL: "border-l-4 border-blue-500", icon: "text-blue-400", hover: "group-hover:text-blue-400", bg: "bg-blue-50", text: "text-blue-700", btn: "bg-blue-600 hover:bg-blue-700" },
+            amber: { borderL: "border-l-4 border-amber-500", icon: "text-amber-400", hover: "group-hover:text-amber-400", bg: "bg-amber-50", text: "text-amber-700", btn: "bg-amber-500 hover:bg-amber-600" },
+            indigo: { borderL: "border-l-4 border-indigo-500", icon: "text-indigo-400", hover: "group-hover:text-indigo-400", bg: "bg-indigo-50", text: "text-indigo-700", btn: "bg-indigo-600 hover:bg-indigo-700" },
+            rose: { borderL: "border-l-4 border-rose-500", icon: "text-rose-400", hover: "group-hover:text-rose-400", bg: "bg-rose-50", text: "text-rose-700", btn: "bg-rose-600 hover:bg-rose-700" },
+            emerald: { borderL: "border-l-4 border-emerald-500", icon: "text-emerald-400", hover: "group-hover:text-emerald-400", bg: "bg-emerald-50", text: "text-emerald-700", btn: "bg-emerald-600 hover:bg-emerald-700" },
+            cyan: { borderL: "border-l-4 border-cyan-500", icon: "text-cyan-400", hover: "group-hover:text-cyan-400", bg: "bg-cyan-50", text: "text-cyan-700", btn: "bg-cyan-600 hover:bg-cyan-700" },
+            purple: { borderL: "border-l-4 border-purple-500", icon: "text-purple-400", hover: "group-hover:text-purple-400", bg: "bg-purple-50", text: "text-purple-700", btn: "bg-purple-600 hover:bg-purple-700" }
+        };
+
+        const appModulesConfig = {
+            1: {
+                role: "Sales & Marketing Team", theme: themes.blue, icon: "fa-comments", 
+                shortTitle: "1. Omnichannel (AI Bot)", title: "Omnichannel CRM & AI Chatbot", 
+                trigger: "ลูกค้ามีความต้องการซับซ้อน ทักแชทเข้ามาปรึกษา",
+                uiConcept: `
+                    <div class="h-full flex flex-col p-4 bg-slate-100">
+                        <div class="bg-white rounded-xl shadow-sm p-3 mb-3 border-l-4 border-blue-500 relative">
+                            <div class="absolute top-2 right-3 text-[9px] text-slate-400"><i class="fa-brands fa-line text-green-500"></i> LINE OA</div>
+                            <div class="text-[11px] font-bold text-slate-800 mb-1">Customer: Khun Aura</div>
+                            <div class="text-[11px] text-slate-600 leading-relaxed bg-slate-50 p-2 rounded-lg border border-slate-100">
+                                "สวัสดีค่ะ อยากทำแบรนด์ 2 ตัวค่ะ เซรั่มลดริ้วรอย กับ ครีมกันแดด <br><br>
+                                - <strong>เซรั่ม:</strong> ขอใส่ Ectoin, เปปไทด์ 3 ชนิด, ไฮยา 8 โมเลกุล และวิตามินซีบริสุทธิ์<br>
+                                - <strong>กันแดด:</strong> ขอ SPF50+ PA++++ เนื้อน้ำเปล่า ไม่วอก<br>
+                                - <strong>แพคเกจ:</strong> ขอขวดปั๊มสูญญากาศ (เซรั่ม) และหลอดบีบแบบพรีเมียม (กันแดด)"
+                            </div>
+                        </div>
+                        
+                        <div class="bg-slate-800 p-3 rounded-xl text-[11px] mb-4 flex-1 text-blue-300 font-mono border border-slate-700 shadow-inner overflow-y-auto">
+                            > SYSTEM: AI NLP Bot is analyzing complex requirements...<br/>
+                            > <strong>Extracting Entities:</strong><br/>
+                            &nbsp;&nbsp;[SKU 1]: Anti-Aging Serum<br/>
+                            &nbsp;&nbsp;[Ingreds]: Ectoin, Peptide x3, 8D Hyaluronic, Pure Vit C<br/>
+                            &nbsp;&nbsp;[Pack]: Airless Pump<br/>
+                            &nbsp;&nbsp;[SKU 2]: Water-based Sunscreen SPF50+ PA++++<br/>
+                            &nbsp;&nbsp;[Pack]: Premium Tube<br/>
+                            > <strong>Lead Score:</strong> 95/100 (High Potential)<br/>
+                            > <strong>Action:</strong> Routing to Senior Sales...
+                        </div>
+                        
+                        <button class="w-full bg-blue-600 text-white text-xs font-bold py-3 rounded-xl hover:bg-blue-700 transition shadow-md flex items-center justify-center shrink-0" onclick="window.showSimLoading('AI Qualifying Lead...', () => window.triggerModal(1))">
+                            <i class="fa-solid fa-robot mr-2"></i> ให้ AI สรุปความต้องการและโอนให้เซลส์อัตโนมัติ
+                        </button>
+                    </div>
+                `,
+                pluginDetail: "<div class='biz-step'><strong>Omnichannel Inbox:</strong> รวมแชททุกช่องทาง เซลส์ไม่ต้องสลับจอไปมา</div><div class='biz-step'><strong>AI NLP Chatbot:</strong> บอทอ่านความต้องการที่ซับซ้อนยาวๆ ของลูกค้า และแตกออกมาเป็น Bullet point ให้เซลส์อ่านง่ายๆ ใน 1 วินาที</div><div class='biz-step'><strong>Lead Routing:</strong> ประเมินความน่าจะเป็น หากลูกค้ารายใหญ่จะจับคู่กับเซลส์ระดับ Senior ให้ดูแลต่อทันที</div>",
+                reduceWork: "ลดเวลาเซลส์ในการนั่งอ่านแชทและสรุป Requirement ลง 100% ทำให้มีเวลาไปโฟกัสที่การเจรจาต่อรองและดูแลความสัมพันธ์ลูกค้าได้ดีขึ้น"
+            },
+            2: {
+                role: "Business Consultant", theme: themes.amber, icon: "fa-file-invoice-dollar", 
+                shortTitle: "2. Interactive CPQ", title: "Real-time CPQ & Tiered Quotation", 
+                trigger: "เซลส์ปรับสูตรและราคาเพื่อทำใบเสนอราคาให้ลูกค้าตัดสินใจ",
+                uiConcept: `
+                    <div class="h-full flex flex-col p-4 bg-slate-100">
+                        <div class="flex-1 overflow-y-auto custom-scrollbar bg-white rounded-xl shadow-sm border border-slate-200 p-4 mb-3">
+                            <div class="text-[11px] font-bold text-slate-800 mb-3 border-b pb-2 sticky top-0 bg-white z-10 flex justify-between items-center">
+                                <span><i class="fa-solid fa-sliders text-amber-500 mr-1"></i> Product Configuration (R&D to PO)</span>
+                                <span class="bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-[9px] shadow-sm">SKU: 1 Item</span>
+                            </div>
+                            
+                            <!-- 1. Formulation -->
+                            <div class="mb-4">
+                                <h4 class="text-[10px] font-bold text-amber-600 mb-2 uppercase flex items-center"><i class="fa-solid fa-flask text-amber-400 mr-1.5"></i> 1. Formulation Details</h4>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-[9px] font-bold text-slate-500 mb-1">Product Texture (เนื้อสัมผัส)</label>
+                                        <select id="cpq-texture" class="w-full text-[10px] p-1.5 border rounded-lg bg-slate-50 outline-none focus:ring-1 focus:ring-amber-500 transition-all" onchange="window.calculateMargin()">
+                                            <option value="500">Clear Serum (Base: ฿500/kg)</option>
+                                            <option value="400">Light Cream (Base: ฿400/kg)</option>
+                                            <option value="600">Water-Gel (Base: ฿600/kg)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[9px] font-bold text-slate-500 mb-1">Hero Actives (สารสกัดหลัก)</label>
+                                        <select id="cpq-actives" class="w-full text-[10px] p-1.5 border rounded-lg bg-slate-50 outline-none focus:ring-1 focus:ring-amber-500 transition-all" onchange="window.calculateMargin()">
+                                            <option value="1000">Whitening: VitC + Niacinamide (+฿1,000/kg)</option>
+                                            <option value="2500" selected>Anti-Aging: Ectoin + Peptides (+฿2,500/kg)</option>
+                                            <option value="1800">Anti-Acne: BHA + Zinc (+฿1,800/kg)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[9px] font-bold text-slate-500 mb-1">Color & Scent (สีและกลิ่น)</label>
+                                        <select id="cpq-scent" class="w-full text-[10px] p-1.5 border rounded-lg bg-slate-50 outline-none focus:ring-1 focus:ring-amber-500 transition-all" onchange="window.calculateMargin()">
+                                            <option value="0">Fragrance-Free / No Color (+฿0)</option>
+                                            <option value="200" selected>Essential Oil Blend (+฿200/kg)</option>
+                                            <option value="350">Luxury Synthetic Perfume (+฿350/kg)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[9px] font-bold text-slate-500 mb-1">Special Claims (คุณสมบัติพิเศษ)</label>
+                                        <select id="cpq-claims" class="w-full text-[10px] p-1.5 border rounded-lg bg-slate-50 outline-none focus:ring-1 focus:ring-amber-500 transition-all">
+                                            <option value="Paraben-Free, Alcohol-Free">Paraben-Free, Alcohol-Free</option>
+                                            <option value="Vegan & Cruelty-Free">Vegan & Cruelty-Free</option>
+                                            <option value="Organic Certified">Organic Certified Ingredients</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 2. Packaging -->
+                            <div class="mb-4">
+                                <h4 class="text-[10px] font-bold text-amber-600 mb-2 uppercase flex items-center"><i class="fa-solid fa-box text-amber-400 mr-1.5"></i> 2. Packaging & Size</h4>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div class="col-span-2">
+                                        <label class="block text-[9px] font-bold text-slate-500 mb-1">Capacity (Net Weight / Unit)</label>
+                                        <div class="flex gap-2">
+                                            <label class="flex-1 border rounded-lg p-1.5 text-center cursor-pointer bg-slate-50 hover:bg-amber-50 has-[:checked]:bg-amber-100 has-[:checked]:border-amber-400 transition-colors">
+                                                <input type="radio" name="cpq-size" value="0.015" class="hidden" onchange="window.calculateMargin()">
+                                                <span class="text-[10px] font-bold text-slate-700">15 ml</span>
+                                            </label>
+                                            <label class="flex-1 border rounded-lg p-1.5 text-center cursor-pointer bg-slate-50 hover:bg-amber-50 has-[:checked]:bg-amber-100 has-[:checked]:border-amber-400 transition-colors">
+                                                <input type="radio" name="cpq-size" value="0.030" class="hidden" checked onchange="window.calculateMargin()">
+                                                <span class="text-[10px] font-bold text-slate-700">30 ml</span>
+                                            </label>
+                                            <label class="flex-1 border rounded-lg p-1.5 text-center cursor-pointer bg-slate-50 hover:bg-amber-50 has-[:checked]:bg-amber-100 has-[:checked]:border-amber-400 transition-colors">
+                                                <input type="radio" name="cpq-size" value="0.050" class="hidden" onchange="window.calculateMargin()">
+                                                <span class="text-[10px] font-bold text-slate-700">50 ml</span>
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[9px] font-bold text-slate-500 mb-1">Primary Pack (บรรจุภัณฑ์ชั้นใน)</label>
+                                        <select id="cpq-primary" class="w-full text-[10px] p-1.5 border rounded-lg bg-slate-50 outline-none focus:ring-1 focus:ring-amber-500 transition-all" onchange="window.calculateMargin()">
+                                            <option value="10">Basic Plastic Tube (+฿10/pc)</option>
+                                            <option value="20">Glass Dropper Bottle (+฿20/pc)</option>
+                                            <option value="35" selected>Premium Airless Pump (+฿35/pc)</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[9px] font-bold text-slate-500 mb-1">Secondary Pack (บรรจุภัณฑ์ชั้นนอก)</label>
+                                        <select id="cpq-secondary" class="w-full text-[10px] p-1.5 border rounded-lg bg-slate-50 outline-none focus:ring-1 focus:ring-amber-500 transition-all" onchange="window.calculateMargin()">
+                                            <option value="5">Standard Box + Shrink Wrap (+฿5)</option>
+                                            <option value="15" selected>Premium Box + Foil (+฿15)</option>
+                                            <option value="30">Luxury Hard Box (+฿30)</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 3. Business -->
+                            <div>
+                                <h4 class="text-[10px] font-bold text-amber-600 mb-2 uppercase flex items-center"><i class="fa-solid fa-chart-line text-amber-400 mr-1.5"></i> 3. Pricing Target</h4>
+                                <div class="grid grid-cols-2 gap-2">
+                                    <div>
+                                        <label class="block text-[9px] font-bold text-slate-500 mb-1">Target MOQ (Units)</label>
+                                        <select id="cpq-moq" class="w-full text-[10px] p-1.5 border rounded-lg bg-slate-50 outline-none focus:ring-1 focus:ring-amber-500 transition-all" onchange="window.calculateMargin()">
+                                            <option value="5000">5,000 units</option>
+                                            <option value="10000" selected>10,000 units</option>
+                                            <option value="50000">50,000 units</option>
+                                        </select>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[9px] font-bold text-slate-500 mb-1">Retail Price (Sell/pc)</label>
+                                        <div class="relative">
+                                            <span class="absolute inset-y-0 left-0 pl-2 flex items-center text-[10px] text-slate-400 font-bold">฿</span>
+                                            <input type="number" id="cpq-price" value="890" class="w-full text-[10px] pl-6 p-1.5 border rounded-lg bg-slate-50 outline-none focus:ring-1 focus:ring-amber-500 transition-all" oninput="window.calculateMargin()">
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Real-time Margin Calculator -->
+                        <div class="bg-white border border-slate-200 p-3 rounded-xl mb-3 shrink-0 shadow-sm flex items-center justify-between">
+                            <div class="flex items-center gap-4">
+                                <div>
+                                    <div class="text-[9px] text-slate-500 font-bold uppercase tracking-wide mb-0.5">Estimated Unit Cost</div>
+                                    <div id="cpq-unit-cost" class="text-sm font-bold text-slate-800">฿0.00</div>
+                                </div>
+                                <div class="h-6 border-r border-slate-200"></div>
+                                <div>
+                                    <div class="text-[9px] text-slate-500 font-bold uppercase tracking-wide mb-0.5">Expected Margin</div>
+                                    <div id="cpq-margin" class="text-xl font-bold text-emerald-600 transition-colors leading-none">0.0%</div>
+                                </div>
+                            </div>
+                            <div id="cpq-margin-status" class="text-right">
+                                <!-- Injected via JS -->
+                            </div>
+                        </div>
+                        
+                        <button class="w-full bg-amber-500 text-white text-xs font-bold py-3.5 rounded-xl hover:bg-amber-600 transition shadow-md flex items-center justify-center shrink-0" onclick="window.showSimLoading('Syncing ERP Costs & Generating PO...', () => window.triggerModal(2))">
+                            <i class="fa-solid fa-file-signature mr-2"></i> สรุปสเปคและสร้างใบเสนอราคา (E-Quotation)
+                        </button>
+                    </div>
+                `,
+                pluginDetail: "<div class='biz-step'><strong>Interactive CPQ (Configure, Price, Quote):</strong> เซลส์สามารถปรับสูตร แพคเกจ และจำนวน (MOQ) ได้อย่างอิสระ ระบบจะคำนวณต้นทุนให้ทันที</div><div class='biz-step'><strong>Real-time Margin AI:</strong> ระบบคำนวณกำไร (Margin) ทันทีที่เปลี่ยนสเปค พร้อมแจ้งเตือนสี (เขียว=ดี, แดง=ขาดทุน) ช่วยลดข้อผิดพลาดในการเสนอราคาผิด</div><div class='biz-step'><strong>Tiered Pricing Generation:</strong> สร้างใบเสนอราคาแบบตารางขั้นบันไดให้อัตโนมัติ เพื่อดึงดูดให้ลูกค้าสั่งผลิตในจำนวนที่มากขึ้น (Upselling)</div>",
+                reduceWork: "ลดเวลาการทำใบเสนอราคาจาก 3-5 วัน เหลือเพียงไม่กี่นาที ไม่ต้องรอฝ่ายจัดซื้ออัปเดตราคา Excel เซลส์ปิดการขายได้เร็วขึ้น โอกาสเสียลูกค้าน้อยลง"
+            },
+            3: {
+                role: "R&D Scientist", theme: themes.indigo, icon: "fa-flask", 
+                shortTitle: "3. Formulation (PLM)", title: "PLM & AI Stability Simulation", 
+                trigger: "ลูกค้ายืนยันใบเสนอราคา โครงการถูกส่งเข้าศูนย์วิจัย R&D",
+                uiConcept: `
+                    <div class="h-full flex flex-col p-4 bg-slate-100">
+                        <div class="bg-white rounded-lg shadow-sm p-3 mb-3 border border-slate-200 flex justify-between items-center">
+                            <div><div class="text-xs font-bold text-slate-800"><i class="fa-solid fa-vial text-indigo-500 mr-1"></i> R&D Project: PRJ-2604</div><div class="text-[10px] text-slate-500">Status: Formulating</div></div>
+                            <i class="fa-brands fa-hubspot text-2xl text-slate-300"></i>
+                        </div>
+                        <div class="bg-indigo-50 p-3 rounded-lg border border-indigo-200 text-[11px] mb-4 flex-1 overflow-y-auto">
+                            <strong>Ingredients Matrix:</strong>
+                            <div class="mt-2 space-y-2">
+                                <div class="flex justify-between items-center border-b border-indigo-100 pb-1"><span class="text-slate-600">Ectoin</span><span class="text-indigo-600 font-bold">2%</span></div>
+                                <div class="flex justify-between items-center border-b border-indigo-100 pb-1"><span class="text-slate-600">Peptide Complex</span><span class="text-indigo-600 font-bold">5%</span></div>
+                                <div class="flex justify-between items-center border-b border-indigo-100 pb-1"><span class="text-slate-600">8D Hyaluronic Acid</span><span class="text-indigo-600 font-bold">3%</span></div>
+                                <div class="flex justify-between items-center"><span class="text-slate-600">Pure Ascorbic Acid</span><span class="text-indigo-600 font-bold">10%</span></div>
+                            </div>
+                        </div>
+                        <button class="w-full bg-indigo-600 text-white text-xs font-bold py-3 rounded-lg hover:bg-indigo-700 transition shadow-md flex items-center justify-center shrink-0" onclick="window.showSimLoading('AI In-Silico Testing...', () => window.triggerModal(3))">
+                            <i class="fa-solid fa-brain mr-2"></i> รัน AI ทดสอบความเข้ากันของสารเคมี (In-Silico)
+                        </button>
+                    </div>
+                `,
+                pluginDetail: "<div class='biz-step'><strong>PLM Centralization:</strong> ดึง Requirement ทั้งหมดจากเซลส์มาสร้างเป็น Project R&D อัตโนมัติใน Teamcenter ข้อมูลไม่ตกหล่น</div><div class='biz-step'><strong>AI In-Silico:</strong> ใช้ AI จำลองปฏิกิริยาทางเคมี (Predictive Stability) ว่าสารสกัดตีกันหรือไม่ ก่อนลงมือผสมจริงในห้องแล็บ</div><div class='biz-step'><strong>LIMS Integration:</strong> บันทึกผลการทดลองเข้าสู่ระบบห้องแล็บดิจิทัล (Paperless) ตรวจสอบย้อนหลังได้ 100%</div>",
+                reduceWork: "ลดการใช้วัตถุดิบราคาแพงมาลองผิดลองถูกในแล็บลงกว่า 80% (ลด R&D Scrap) และลดเวลาที่นักวิจัยต้องจดผลแล็บลงสมุดแล้วคีย์ลงคอมพิวเตอร์ซ้ำ"
+            },
+            4: {
+                role: "Regulatory Affairs (RA)", theme: themes.rose, icon: "fa-file-shield", 
+                shortTitle: "4. Regulatory (NLP)", title: "AI Compliance & RPA Submission", 
+                trigger: "สูตรนิ่ง ฝ่ายอาร์ตเวิร์คส่งไฟล์กล่อง (Artwork) ให้ตรวจความถูกต้อง",
+                uiConcept: `
+                    <div class="h-full flex flex-col p-4 bg-slate-100">
+                        <div class="bg-white rounded-lg shadow-sm p-4 mb-3 border border-slate-200 flex flex-col items-center justify-center flex-1 relative overflow-hidden">
+                            <i class="fa-solid fa-box text-5xl text-slate-200 mb-2"></i>
+                            <div class="text-[10px] text-slate-500 font-medium bg-slate-100 px-3 py-1 rounded-full">Artwork_AuraSerum_V1.pdf</div>
+                            <div class="mt-4 text-[11px] italic text-slate-700 text-center px-4 leading-loose">
+                                "เซรั่มหน้า<span class="text-rose-500 font-bold border-b border-rose-500 border-dashed">ขาวทันทีใน 3 วัน</span><br>
+                                การันตีผลลัพธ์ <span class="text-rose-500 font-bold border-b border-rose-500 border-dashed">เปลี่ยนพันธุกรรมผิว</span>"
+                            </div>
+                            
+                            <!-- Scanning Laser Animation -->
+                            <div class="absolute inset-0 bg-rose-500/10 border-t-2 border-rose-500 hidden z-10" id="scan-box-4" style="animation: scan 1.5s linear infinite;"></div>
+                        </div>
+                        <button class="w-full bg-rose-600 text-white text-xs font-bold py-3 rounded-lg hover:bg-rose-700 transition shadow-md flex items-center justify-center shrink-0" onclick="window.appActions.runStage4Scan()">
+                            <i class="fa-solid fa-magnifying-glass-chart mr-2"></i> สแกนคำโฆษณาผิดกฎหมาย & ยื่น อย.
+                        </button>
+                    </div>
+                `,
+                pluginDetail: "<div class='biz-step'><strong>AI OCR & NLP:</strong> ระบบแปลงภาพ Artwork เป็นตัวอักษร และสแกนเทียบกับฐานข้อมูลคำต้องห้ามของ อย. แบบคำต่อคำ</div><div class='biz-step'><strong>Auto-Flagging:</strong> ไฮไลท์คำที่เสี่ยงต่อการเคลมเกินจริง (Overclaim) และแนะนำคำที่ปลอดภัยให้ฝ่ายกราฟิกแก้ไขทันที</div><div class='biz-step'><strong>RPA e-Submission:</strong> เมื่อเอกสารผ่านหมด หุ่นยนต์ซอฟต์แวร์ (RPA) จะนำข้อมูลไปกรอกลงในเว็บไซต์ของ อย. เพื่อจดแจ้งให้อัตโนมัติ</div>",
+                reduceWork: "เจ้าหน้าที่กฎหมายไม่ต้องใช้สายตาเพ่งอ่านคำโฆษณาบนกล่องทีละตัวอักษร ป้องกันความผิดพลาด 100% และลดเวลาคีย์ฟอร์มจดแจ้ง อย. ด้วยมือ"
+            },
+            
+            5: {
+                role: "Factory / Plant Manager", theme: themes.emerald, icon: "fa-industry", 
+                shortTitle: "5. Production (IoT)", title: "Smart Factory & Journey Tracker", 
+                trigger: "ได้รับใบอนุญาตครบถ้วน ระบบสั่งเปิดคำสั่งผลิตลงหน้างาน",
+                uiConcept: `
+                    <div class="h-full flex flex-col p-4 bg-slate-100">
+                        <!-- Customer Journey Tracker View -->
+                        <div class="bg-white rounded-xl shadow-sm p-4 mb-3 border border-slate-200">
+                            <div class="text-[10px] font-bold text-slate-800 uppercase tracking-widest mb-3 flex items-center justify-between">
+                                <span><i class="fa-solid fa-route text-emerald-500 mr-1"></i> Live Production Journey</span>
+                                <span class="bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded text-[9px] animate-pulse">Running</span>
+                            </div>
+                            <div class="relative pt-1">
+                                <div class="overflow-hidden h-2 mb-4 text-xs flex rounded-full bg-slate-200">
+                                    <div style="width: 40%" class="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-emerald-500"></div>
+                                </div>
+                                <div class="flex justify-between text-[9px] text-slate-500 font-medium">
+                                    <span class="text-emerald-600 font-bold">Mixing (40%)</span>
+                                    <span>Lab QA</span>
+                                    <span>Filling</span>
+                                    <span>Packing</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- IoT / OEE Dashboard -->
+                        <div class="grid grid-cols-2 gap-2 mb-4 flex-1">
+                            <div class="bg-slate-900 p-3 rounded-xl border border-slate-700 shadow-inner flex flex-col justify-center items-center text-center">
+                                <div class="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-1">Live OEE</div>
+                                <div class="text-2xl font-bold text-emerald-400">92.4%</div>
+                            </div>
+                            <div class="bg-slate-900 p-3 rounded-xl border border-slate-700 shadow-inner flex flex-col justify-center items-center text-center">
+                                <div class="text-[9px] text-slate-400 font-bold uppercase tracking-wider mb-1">Vision AI Defect</div>
+                                <div class="text-2xl font-bold text-rose-400">0</div>
+                            </div>
+                        </div>
+                        
+                        <button class="w-full bg-emerald-600 text-white text-xs font-bold py-3.5 rounded-xl hover:bg-emerald-700 transition shadow-md flex items-center justify-center shrink-0" onclick="window.showSimLoading('Syncing IoT Sensors...', () => window.triggerModal(5))">
+                            <i class="fa-solid fa-satellite-dish mr-2"></i> สั่งเดินเครื่อง & อัปเดต Dashboard
+                        </button>
+                    </div>
+                `,
+                pluginDetail: "<div class='biz-step'><strong>Customer Journey Tracker:</strong> ระบบส่งข้อมูลสถานะการผลิตกลับไปให้ลูกค้าดูผ่านมือถือได้แบบ Real-time ลดการโทรถามสถานะงาน</div><div class='biz-step'><strong>MES Smart Scheduling:</strong> ระบบจัดคิวงานให้เครื่องจักรเพื่อลดเวลาการล้างเครื่อง (Changeover) ให้สั้นที่สุด</div><div class='biz-step'><strong>IoT & Vision AI:</strong> เซนเซอร์จับอุณหภูมิ/ความเร็ว ส่งขึ้น Cloud เรียลไทม์ (OEE) และกล้อง AI สแกนคัดแยกสินค้าที่ซีลไม่สนิททิ้งอัตโนมัติ</div>",
+                reduceWork: "ยกเลิกการใช้กระดาษจดคิวงานหน้าเครื่อง (Paperless Shopfloor) ลูกค้ารู้สึกอุ่นใจที่ติดตามสถานะสินค้าตนเองได้ตลอดเวลา ลดภาระฝ่ายดูแลลูกค้า"
+            },
+            6: {
+                role: "Logistics Manager", theme: themes.cyan, icon: "fa-boxes-packing", 
+                shortTitle: "6. Logistics (WMS)", title: "WMS Pro & 3PL API Dispatch", 
+                trigger: "สินค้าบรรจุเสร็จเข้าคลัง WMS จัดการการจัดส่ง",
+                uiConcept: `
+                    <div class="h-full flex flex-col p-4 bg-slate-100">
+                        <div class="bg-white rounded-xl shadow-sm p-3 mb-3 border-l-4 border-cyan-500">
+                            <div class="flex justify-between items-center border-b pb-2 mb-2">
+                                <div><div class="text-xs font-bold text-slate-800">Order: #ORD-992</div><div class="text-[10px] text-slate-500">Aura Serum 10k Units</div></div>
+                                <span class="bg-cyan-100 text-cyan-700 text-[10px] px-2 py-1 rounded font-bold"><i class="fa-solid fa-boxes-stacked mr-1"></i> Ready</span>
+                            </div>
+                            <!-- Mini WMS Map -->
+                            <div class="text-[10px] text-slate-600 font-bold mb-1"><i class="fa-solid fa-map-location-dot text-cyan-500 mr-1"></i> Location: Zone A (Rack 12)</div>
+                            <div class="w-full bg-slate-100 h-12 rounded-lg border border-slate-200 flex p-1 gap-1">
+                                <div class="h-full w-1/4 bg-slate-200 rounded"></div>
+                                <div class="h-full w-1/4 bg-cyan-400 rounded animate-pulse shadow-sm flex items-center justify-center text-[8px] text-white font-bold">A-12</div>
+                                <div class="h-full w-1/4 bg-slate-200 rounded"></div>
+                                <div class="h-full w-1/4 bg-slate-200 rounded"></div>
+                            </div>
+                        </div>
+                        <div class="bg-slate-800 p-3 rounded-xl text-[11px] mb-4 flex-1 text-cyan-300 font-mono border border-slate-700 shadow-inner flex flex-col justify-center">
+                            > [Finance] Payment cleared.<br>
+                            > [WMS] Pallet A-12 Unlocked.<br>
+                            > [3PL API] Awaiting Transport Request...
+                        </div>
+                        <button class="w-full bg-cyan-600 text-white text-xs font-bold py-3.5 rounded-xl hover:bg-cyan-700 transition shadow-md flex items-center justify-center shrink-0" onclick="window.showSimLoading('Routing & API Call to 3PL...', () => window.triggerModal(6))">
+                            <i class="fa-solid fa-truck-fast mr-2"></i> ยิง API เรียกรถขนส่ง & พิมพ์ใบปะหน้า
+                        </button>
+                    </div>
+                `,
+                pluginDetail: "<div class='biz-step'><strong>WMS Put-away & Picking:</strong> ระบบคลังสินค้าอัจฉริยะชี้เป้าหมายจัดเก็บ (Zone/Rack) และหาเส้นทางหยิบของที่สั้นที่สุดให้พนักงาน</div><div class='biz-step'><strong>AI Financial Recon:</strong> AI อ่านสลิปโอนเงินจับคู่ Invoice อัตโนมัติ ทันทีที่บัญชีตัดยอด ระบบคลังจะปลดล็อกให้แพ็คของได้ทันที</div><div class='biz-step'><strong>3PL API Integration:</strong> ยิง API เรียกรถขนส่ง (DHL/Kerry) พิมพ์ใบปะหน้าและยิง SMS แจ้ง Tracking ให้ลูกค้าอัตโนมัติ</div>",
+                reduceWork: "สินค้าไม่ติดแหง็กในคลังระหว่างรออนุมัติข้ามแผนก ลดเวลาพิมพ์ใบปะหน้าด้วยมือ ป้องกันสินค้าสูญหายหรือหาไม่เจอด้วยแผนที่คลังอัจฉริยะ"
+            },
+            7: {
+                role: "Key Account Manager", theme: themes.purple, icon: "fa-chart-pie", 
+                shortTitle: "7. Loyalty (Predictive)", title: "RFM Marketing & Predictive Demand", 
+                trigger: "ลูกค้าขายสินค้าไปได้ระยะหนึ่ง ข้อมูลยอดขายเริ่มเข้าสู่ระบบ",
+                uiConcept: `
+                    <div class="h-full flex flex-col p-4 bg-slate-100">
+                        <!-- RFM Score Dashboard -->
+                        <div class="bg-white rounded-xl shadow-sm p-3 mb-3 border border-slate-200">
+                            <div class="text-[10px] font-bold text-slate-800 uppercase tracking-widest mb-2 border-b pb-1">Customer RFM Analysis</div>
+                            <div class="flex justify-between items-center mt-2">
+                                <div class="text-center w-1/3 border-r">
+                                    <div class="text-lg font-bold text-slate-700">R<span class="text-[10px] text-slate-400 font-normal ml-1">12d</span></div>
+                                </div>
+                                <div class="text-center w-1/3 border-r">
+                                    <div class="text-lg font-bold text-slate-700">F<span class="text-[10px] text-slate-400 font-normal ml-1">3x</span></div>
+                                </div>
+                                <div class="text-center w-1/3">
+                                    <div class="text-lg font-bold text-purple-600">M<span class="text-[10px] font-normal ml-1 text-purple-400">High</span></div>
+                                </div>
+                            </div>
+                            <div class="mt-2 text-[10px] text-center bg-purple-100 text-purple-800 py-1 rounded font-bold">Segment: "Champion" (VIP)</div>
+                        </div>
+
+                        <div class="bg-purple-900 p-3 rounded-xl text-[11px] mb-4 flex-1 border border-purple-700 text-purple-200 shadow-inner flex flex-col justify-center">
+                            <strong class="text-purple-300 mb-1"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> AI Next Best Action:</strong><br>
+                            Predictive model shows Khun Aura's serum stock will deplete in 14 days.<br><br>
+                            <strong>Suggestion:</strong> Propose Re-order + Upsell new "Sunscreen" formula mapped in initial chat.
+                        </div>
+                        <button class="w-full bg-purple-600 text-white text-xs font-bold py-3.5 rounded-xl hover:bg-purple-700 transition shadow-md flex items-center justify-center shrink-0" onclick="window.showSimLoading('Executing Marketing Automation...', () => window.triggerModal(7))">
+                            <i class="fa-solid fa-bullseye mr-2"></i> ยิงแคมเปญเสนอสูตรใหม่ & กระตุ้น Re-order
+                        </button>
+                    </div>
+                `,
+                pluginDetail: "<div class='biz-step'><strong>RFM Segmentation:</strong> จัดกลุ่มลูกค้าอัตโนมัติตาม Recency (ซื้อล่าสุดเมื่อไหร่), Frequency (บ่อยแค่ไหน), Monetary (ยอดเงินเท่าไหร่) เพื่อดูแลแบบ VIP</div><div class='biz-step'><strong>Predictive Demand AI:</strong> คำนวณความเร็วในการขายและแจ้งเตือนจุดสั่งซื้อซ้ำ (Re-order Point) ก่อนของขาดตลาด</div><div class='biz-step'><strong>Next Best Action (NBA):</strong> AI แนะนำให้เซลส์รู้ว่าควรโทรหาลูกค้าคนนี้เพื่อเสนอสินค้า 'ตัวถัดไป' คืออะไร (เช่น เสนอกันแดด เพราะเคยถามไว้ในแชทครั้งแรกสุด)</div>",
+                reduceWork: "เปลี่ยนรูปแบบการทำงานจากการ 'รอรับออเดอร์' เป็น 'การบริการเชิงรุก' (Proactive) สร้างความว้าวและความภักดีระยะยาว (Retention) อย่างมืออาชีพ"
+            }
+        };
+
+        // --- Calculate Margin function for Stage 2 (CPQ) ---
+        window.calculateMargin = function() {
+            // Get R&D Formulation Values
+            const textureCost = parseFloat(document.getElementById('cpq-texture')?.value || 500);
+            const activesCost = parseFloat(document.getElementById('cpq-actives')?.value || 2500);
+            const scentCost = parseFloat(document.getElementById('cpq-scent')?.value || 200);
+            
+            // Get Size Value from Radio buttons
+            let sizeVal = 0.030; // Default 30ml
+            const sizeRadios = document.getElementsByName('cpq-size');
+            if(sizeRadios) {
+                for(const radio of sizeRadios) {
+                    if(radio.checked) sizeVal = parseFloat(radio.value);
+                }
+            }
+
+            // Get Packaging Values
+            const primaryCost = parseFloat(document.getElementById('cpq-primary')?.value || 35);
+            const secondaryCost = parseFloat(document.getElementById('cpq-secondary')?.value || 15);
+            
+            // Get Target Retail Price
+            const retailPrice = parseFloat(document.getElementById('cpq-price')?.value || 890);
+
+            // Real-time Cost Calculation Engine
+            const formulaCostPerKg = textureCost + activesCost + scentCost; // Cost of liquid bulk per Kg
+            const formulaCostPerUnit = formulaCostPerKg * sizeVal; // Liquid bulk cost per unit (e.g. 30g = 0.03kg)
+            const totalCostPerUnit = formulaCostPerUnit + primaryCost + secondaryCost; // Total Bill of Materials (BOM)
+            
+            // Margin Calculation
+            const margin = retailPrice - totalCostPerUnit;
+            const marginPercent = retailPrice > 0 ? (margin / retailPrice) * 100 : 0;
+
+            // Update UI Elements
+            const costEl = document.getElementById('cpq-unit-cost');
+            const marginEl = document.getElementById('cpq-margin');
+            const marginStatusEl = document.getElementById('cpq-margin-status');
+
+            if(costEl) {
+                costEl.innerText = '฿' + totalCostPerUnit.toFixed(2);
+            }
+
+            if(marginEl) {
+                marginEl.innerText = marginPercent.toFixed(1) + '%';
+                
+                // Dynamic Color Formatting based on margin health
+                if(marginPercent > 60) {
+                    marginEl.className = 'text-xl font-bold text-emerald-500 transition-colors leading-none';
+                    if(marginStatusEl) marginStatusEl.innerHTML = '<div class="text-[10px] bg-emerald-100 text-emerald-700 px-2 py-1 rounded font-bold"><i class="fa-solid fa-check-circle mr-1"></i> High Margin</div>';
+                } else if(marginPercent > 30) {
+                    marginEl.className = 'text-xl font-bold text-amber-500 transition-colors leading-none';
+                    if(marginStatusEl) marginStatusEl.innerHTML = '<div class="text-[10px] bg-amber-100 text-amber-700 px-2 py-1 rounded font-bold"><i class="fa-solid fa-exclamation-triangle mr-1"></i> Acceptable Margin</div>';
+                } else {
+                    marginEl.className = 'text-xl font-bold text-rose-500 transition-colors leading-none';
+                    if(marginStatusEl) marginStatusEl.innerHTML = '<div class="text-[10px] bg-rose-100 text-rose-700 px-2 py-1 rounded font-bold"><i class="fa-solid fa-xmark-circle mr-1"></i> Low Margin (Risk)</div>';
+                }
+            }
+        };
+
+        window.toggleFocusMode = function() {
+            window.appState.isFocusMode = !window.appState.isFocusMode;
+            const panel = document.getElementById('system-interface-panel');
+            const icon = document.getElementById('focus-icon');
+            
+            if (!panel) return;
+
+            if (window.appState.isFocusMode) {
+                // Turn ON Focus Mode
+                panel.classList.add('focus-active');
+                if(icon) {
+                    icon.classList.remove('fa-expand');
+                    icon.classList.add('fa-compress');
+                }
+            } else {
+                // Turn OFF Focus Mode
+                panel.classList.remove('focus-active');
+                if(icon) {
+                    icon.classList.remove('fa-compress');
+                    icon.classList.add('fa-expand');
+                }
+            }
+        };
+
+        window.appActions = {
+            runStage4Scan: function() {
+                const scanBox = document.getElementById('scan-box-4');
+                if (scanBox) scanBox.classList.remove('hidden');
+                window.showSimLoading('AI Scanning FDA Database...', () => window.triggerModal(4));
+            },
+            signQuotation: function(btn) {
+                btn.innerHTML = '<i class="fa-solid fa-fingerprint text-lg mr-2"></i> อนุมัติด้วย Digital Signature เรียบร้อย';
+                btn.className = 'mt-4 p-3 bg-emerald-50 border-2 border-solid border-emerald-400 text-emerald-700 rounded-xl text-center font-bold shadow-sm cursor-default';
+                btn.onclick = null; // Prevent double click
+                const nextBtn = document.getElementById('modal-next-btn');
+                if (nextBtn) {
+                    nextBtn.disabled = false;
+                    nextBtn.classList.remove('opacity-50', 'cursor-not-allowed', 'bg-slate-400');
+                    nextBtn.classList.add('bg-brand-600', 'hover:bg-brand-700', 'shadow-md', 'animate-pulse-fast');
+                }
+            }
+        };
+
+        // --- Core Modal & Loading Controls ---
+        window.showSimLoading = function(text, callback) {
+            const overlay = document.getElementById('sim-loading-overlay');
+            if(!overlay) return;
+            document.getElementById('sim-loading-text').innerText = text;
+            
+            overlay.classList.remove('hidden');
+            overlay.classList.add('flex');
+            
+            setTimeout(() => {
+                overlay.classList.add('hidden');
+                overlay.classList.remove('flex');
+                if(callback) callback();
+            }, 1800); 
+        };
+
+        window.openSimModal = function(title, bodyHtml, actionHtml) {
+            const titleEl = document.getElementById('sim-doc-title');
+            const bodyEl = document.getElementById('sim-doc-body');
+            const actionEl = document.getElementById('sim-doc-action');
+            const modal = document.getElementById('sim-doc-modal');
+
+            if (titleEl) titleEl.innerHTML = `<i class="fa-solid fa-check-circle text-emerald-500 mr-2"></i> ${title}`;
+            if (bodyEl) bodyEl.innerHTML = bodyHtml;
+            if (actionEl) actionEl.innerHTML = actionHtml;
+            
+            if (modal) {
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+            }
+        };
+
+        window.closeSimModal = function() {
+            const modal = document.getElementById('sim-doc-modal');
+            if (modal) {
+                modal.classList.add('hidden');
+                modal.classList.remove('flex');
+            }
+        };
+
+        window.triggerModal = function(stageId) {
+            let body = "", action = "";
+            
+            if (stageId === 1) {
+                body = `
+                    <div class="text-center">
+                        <i class="fa-brands fa-salesforce text-6xl text-blue-500 mb-4 drop-shadow-md"></i>
+                        <h3 class="font-bold text-slate-800 text-lg mb-2">Lead Auto-Created in CRM</h3>
+                        <div class="bg-blue-50 border border-blue-100 rounded-lg p-4 text-left text-xs text-slate-700">
+                            <p class="mb-2"><i class="fa-solid fa-check text-emerald-500 mr-2"></i><strong>Intent 1:</strong> Anti-Aging Serum (Ectoin, Peptides, VitC)</p>
+                            <p class="mb-2"><i class="fa-solid fa-check text-emerald-500 mr-2"></i><strong>Intent 2:</strong> Water-based Sunscreen SPF50+</p>
+                            <p class="mb-2"><i class="fa-solid fa-check text-emerald-500 mr-2"></i><strong>Score:</strong> High Potential (Cross-sell detected)</p>
+                            <hr class="my-3 border-blue-200">
+                            <p class="text-blue-700 font-bold"><i class="fa-solid fa-share-nodes mr-2"></i>Assigned to: Senior Consultant Team A</p>
+                        </div>
+                    </div>`;
+                action = `<button class="w-full bg-brand-600 text-white text-xs font-bold py-3.5 rounded-lg hover:bg-brand-700 transition shadow-md" onclick="window.closeSimModal(); window.selectAppModule(2)">รับเรื่องเพื่อทำใบเสนอราคา (ไป Stage 2) <i class="fa-solid fa-arrow-right ml-1"></i></button>`;
+                window.openSimModal('CRM Integration Success', body, action);
+            }
+            else if (stageId === 2) {
+                // Utility function to get selected text from dropdown
+                const getOptText = (id) => {
+                    const el = document.getElementById(id);
+                    return el ? el.options[el.selectedIndex].text.split(' (+')[0].split(' (')[0] : '';
+                };
+                
+                // Fetch All Configuration Data from Stage 2 UI
+                const textureName = getOptText('cpq-texture') || 'Clear Serum';
+                const activesName = getOptText('cpq-actives') || 'Anti-Aging: Ectoin + Peptides';
+                const scentName = getOptText('cpq-scent') || 'Essential Oil Blend';
+                const claimsName = getOptText('cpq-claims') || 'Paraben-Free, Alcohol-Free';
+                const primaryName = getOptText('cpq-primary') || 'Premium Airless Pump';
+                const secondaryName = getOptText('cpq-secondary') || 'Premium Box + Foil Stamp';
+
+                // Fetch Size
+                let sizeName = "30 ml";
+                const sizeRadios = document.getElementsByName('cpq-size');
+                if(sizeRadios) {
+                    for(const radio of sizeRadios) {
+                        if(radio.checked) sizeName = (parseFloat(radio.value) * 1000) + " ml";
+                    }
+                }
+
+                // Fetch MOQ
+                const moqEl = document.getElementById('cpq-moq');
+                const selectedMoq = moqEl ? parseInt(moqEl.value) : 10000;
+                
+                // Fetch Calculated Base Cost (already generated by logic)
+                const costEl = document.getElementById('cpq-unit-cost');
+                const baseCost = costEl ? parseFloat(costEl.innerText.replace('฿', '')) : 146.00;
+
+                // Create Tiered Pricing Table (Volume Discount Logic)
+                const t1_moq = 5000, t1_unit = baseCost * 1.12;  // 5k units -> Highest unit cost
+                const t2_moq = 10000, t2_unit = baseCost * 1.00; // 10k units -> Base unit cost
+                const t3_moq = 50000, t3_unit = baseCost * 0.85; // 50k units -> Best discount (-15%)
+
+                const t1_total = t1_unit * t1_moq;
+                const t2_total = t2_unit * t2_moq;
+                const t3_total = t3_unit * t3_moq;
+
+                // Selected Tier Total
+                const selectedTotal = (selectedMoq === 5000) ? t1_total : (selectedMoq === 10000) ? t2_total : t3_total;
+
+                body = `
+                    <div class="bg-white p-5 shadow-sm border border-slate-200 rounded-xl text-xs text-slate-700 relative overflow-hidden">
+                        <div class="absolute top-0 right-0 bg-amber-500 text-white px-3 py-1 rounded-bl-lg font-bold text-[10px] shadow-sm"><i class="fa-solid fa-file-invoice mr-1"></i>PRODUCTION ORDER</div>
+                        
+                        <div class="flex justify-between border-b border-slate-100 pb-3 mb-3 mt-2">
+                            <div>
+                                <div class="font-bold text-slate-800 text-base tracking-wide">REVOMED ENTERPRISE</div>
+                                <div class="text-[9px] text-slate-400 font-ui uppercase">One-Stop OEM Manufacturer</div>
+                            </div>
+                            <div class="text-right text-[10px]"><strong>QUOTATION & PO</strong><br/>#PO-${Math.floor(10000 + Math.random() * 90000)}<br/>Date: Today</div>
+                        </div>
+                        
+                        <!-- Checklist Details Box -->
+                        <div class="mb-4 bg-slate-50/80 rounded-xl border border-slate-100 p-3.5 shadow-sm">
+                            <h4 class="text-[10px] font-bold text-slate-800 mb-2 border-b border-slate-200 pb-1.5"><i class="fa-solid fa-list-check text-amber-500 mr-1.5"></i> Production Checklist (สเปคการผลิต)</h4>
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-2 text-[10.5px]">
+                                <div><span class="text-slate-500">Product Name:</span> <strong class="text-slate-800">Custom Brand Formulation</strong></div>
+                                <div><span class="text-slate-500">Formula Code:</span> <strong class="text-slate-800 font-mono text-[9px] bg-slate-200 px-1 py-0.5 rounded">FML-${Math.floor(1000 + Math.random() * 9000)}</strong></div>
+                                
+                                <div><span class="text-slate-500">Texture:</span> <strong>${textureName}</strong></div>
+                                <div><span class="text-slate-500">Net Weight:</span> <strong>${sizeName}</strong></div>
+                                
+                                <div class="col-span-2"><span class="text-slate-500">Actives (สารสกัด):</span> <strong class="text-indigo-600">${activesName}</strong></div>
+                                <div class="col-span-2"><span class="text-slate-500">Color/Scent:</span> <strong>${scentName}</strong></div>
+                                <div class="col-span-2"><span class="text-slate-500">Special Claims:</span> <strong class="text-emerald-600">${claimsName}</strong></div>
+                            </div>
+                            
+                            <h4 class="text-[10px] font-bold text-slate-800 mt-4 mb-2 border-b border-slate-200 pb-1.5"><i class="fa-solid fa-box-open text-amber-500 mr-1.5"></i> Packaging Details (บรรจุภัณฑ์)</h4>
+                            <div class="grid grid-cols-1 gap-1.5 text-[10.5px]">
+                                <div><span class="text-slate-500">Primary (ขวด/กระปุก):</span> <strong>${primaryName}</strong></div>
+                                <div><span class="text-slate-500">Secondary (กล่องนอก):</span> <strong>${secondaryName}</strong></div>
+                                <div><span class="text-slate-500">Labeling:</span> <strong>Standard FDA + Barcode + Lot/MFG/EXP Print</strong></div>
+                            </div>
+                        </div>
+
+                        <!-- Tiered Pricing Section -->
+                        <div class="mb-5">
+                            <div class="text-[10px] font-bold text-slate-800 mb-2 uppercase flex items-center"><i class="fa-solid fa-layer-group text-amber-500 mr-1.5"></i> Volume Discount Options (MOQ)</div>
+                            <div class="grid grid-cols-3 gap-2">
+                                <div class="border rounded-xl p-2 text-center transition-all ${selectedMoq === 5000 ? 'border-amber-400 bg-amber-50 ring-2 ring-amber-400 shadow-md transform scale-105 z-10' : 'border-slate-200 bg-white opacity-70'}">
+                                    <div class="text-[10px] ${selectedMoq === 5000 ? 'text-amber-700 font-bold' : 'text-slate-500'} mb-1">5,000 Units</div>
+                                    <div class="text-[13px] font-bold ${selectedMoq === 5000 ? 'text-amber-700' : 'text-slate-800'}">฿${t1_unit.toFixed(2)}<span class="text-[9px] font-normal opacity-70">/pc</span></div>
+                                    <div class="text-[9px] mt-1 ${selectedMoq === 5000 ? 'text-amber-600' : 'text-slate-400'}">Total: ฿${t1_total.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</div>
+                                </div>
+                                <div class="border rounded-xl p-2 text-center transition-all ${selectedMoq === 10000 ? 'border-amber-400 bg-amber-50 ring-2 ring-amber-400 shadow-md transform scale-105 z-10' : 'border-slate-200 bg-white opacity-70'}">
+                                    <div class="text-[10px] ${selectedMoq === 10000 ? 'text-amber-700 font-bold' : 'text-slate-500'} mb-1">10,000 Units</div>
+                                    <div class="text-[13px] font-bold ${selectedMoq === 10000 ? 'text-amber-700' : 'text-slate-800'}">฿${t2_unit.toFixed(2)}<span class="text-[9px] font-normal opacity-70">/pc</span></div>
+                                    <div class="text-[9px] mt-1 ${selectedMoq === 10000 ? 'text-amber-600' : 'text-slate-400'}">Total: ฿${t2_total.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</div>
+                                </div>
+                                <div class="border rounded-xl p-2 text-center transition-all ${selectedMoq === 50000 ? 'border-amber-400 bg-amber-50 ring-2 ring-amber-400 shadow-md transform scale-105 z-10' : 'border-slate-200 bg-white opacity-70'}">
+                                    <div class="text-[10px] ${selectedMoq === 50000 ? 'text-amber-700 font-bold' : 'text-slate-500'} mb-1 flex justify-center items-center gap-1">50k Units <span class="text-rose-500 font-bold text-[8px] bg-rose-100 px-1 rounded">-15%</span></div>
+                                    <div class="text-[13px] font-bold ${selectedMoq === 50000 ? 'text-amber-700' : 'text-slate-800'}">฿${t3_unit.toFixed(2)}<span class="text-[9px] font-normal opacity-70">/pc</span></div>
+                                    <div class="text-[9px] mt-1 ${selectedMoq === 50000 ? 'text-amber-600' : 'text-slate-400'}">Total: ฿${t3_total.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-amber-100/60 p-3 rounded-lg flex justify-between items-center font-bold text-sm text-amber-900 border border-amber-200 mb-2 shadow-inner">
+                            <span><i class="fa-solid fa-check-circle text-amber-500 mr-1.5"></i> Selected Proposal</span>
+                            <span>${selectedMoq.toLocaleString()} Units = ฿${selectedTotal.toLocaleString(undefined, {minimumFractionDigits: 0, maximumFractionDigits: 0})}</span>
+                        </div>
+
+                        <div id="sign-btn" class="mt-4 p-3 bg-white border-2 border-dashed border-amber-400 text-amber-600 rounded-xl text-center cursor-pointer hover:bg-amber-50 font-bold transition-all shadow-sm" onclick="window.appActions.signQuotation(this)">
+                            <i class="fa-solid fa-file-signature mr-1"></i> ลูกค้ายืนยันสเปคและลงนาม (e-Signature)
+                        </div>
+                    </div>`;
+                action = `<button id="modal-next-btn" disabled class="w-full bg-slate-400 text-white text-xs font-bold py-3.5 rounded-lg opacity-50 cursor-not-allowed transition-all" onclick="window.closeSimModal(); window.selectAppModule(3)">ส่งข้อมูลโปรเจกต์เข้าห้องแล็บ R&D (ไป Stage 3) <i class="fa-solid fa-arrow-right ml-1"></i></button>`;
+                window.openSimModal('Digital Quotation & PO Generated', body, action);
+            }
+            else if (stageId === 3) {
+                body = `
+                    <div class="text-center">
+                        <i class="fa-solid fa-microscope text-6xl text-indigo-500 mb-4 drop-shadow-md"></i>
+                        <h3 class="font-bold text-slate-800 text-lg mb-2">Predictive Stability Passed</h3>
+                        <div class="bg-indigo-50 border border-indigo-100 rounded-lg p-4 text-left text-xs text-slate-700">
+                            <p class="mb-2"><i class="fa-solid fa-check text-emerald-500 mr-2"></i><strong>Chemical Match:</strong> 99.8% Compatibility (Ectoin + Peptides)</p>
+                            <p class="mb-2"><i class="fa-solid fa-check text-emerald-500 mr-2"></i><strong>Phase Separation Risk:</strong> None Detected</p>
+                            <hr class="my-3 border-indigo-200">
+                            <p class="text-indigo-700 font-bold"><i class="fa-solid fa-database mr-2"></i>Formula Saved to LIMS & ready for Physical Lab.</p>
+                        </div>
+                    </div>`;
+                action = `<button class="w-full bg-brand-600 text-white text-xs font-bold py-3.5 rounded-lg hover:bg-brand-700 transition shadow-md" onclick="window.closeSimModal(); window.selectAppModule(4)">ส่งแบบให้ฝ่ายกฎหมายขึ้นทะเบียน อย. (ไป Stage 4) <i class="fa-solid fa-arrow-right ml-1"></i></button>`;
+                window.openSimModal('R&D Innovation Hub', body, action);
+            }
+            else if (stageId === 4) {
+                body = `
+                    <div class="text-center">
+                        <i class="fa-solid fa-file-circle-check text-6xl text-rose-500 mb-4 drop-shadow-md"></i>
+                        <h3 class="font-bold text-slate-800 text-lg mb-2">AI Compliance Verification</h3>
+                        <div class="bg-rose-50 border border-rose-200 rounded-lg p-4 text-left text-xs text-slate-700">
+                            <p class="text-rose-600 font-bold mb-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Issue Found on Packaging Text:</p>
+                            <p class="line-through text-slate-500 ml-5">"ขาวทันทีใน 3 วัน เปลี่ยนพันธุกรรมผิว"</p>
+                            <p class="text-emerald-600 font-bold mt-3"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> AI Suggested Correction:</p>
+                            <p class="ml-5">"แลดูกระจ่างใสขึ้นอย่างเป็นธรรมชาติ เมื่อใช้ต่อเนื่อง"</p>
+                            <hr class="my-3 border-rose-200">
+                            <p class="text-slate-800 font-bold"><i class="fa-solid fa-robot text-rose-500 mr-2"></i>RPA submitted corrected Dossier to Thai FDA E-Submission.</p>
+                        </div>
+                    </div>`;
+                action = `<button class="w-full bg-brand-600 text-white text-xs font-bold py-3.5 rounded-lg hover:bg-brand-700 transition shadow-md" onclick="window.closeSimModal(); window.selectAppModule(5)">อนุมัติแล้ว! โยนออเดอร์ลงโรงงานผลิต (ไป Stage 5) <i class="fa-solid fa-arrow-right ml-1"></i></button>`;
+                window.openSimModal('Legal & Regulatory Automation', body, action);
+            }
+            else if (stageId === 5) {
+                body = `
+                    <div class="text-center">
+                        <i class="fa-solid fa-cogs text-6xl text-emerald-500 mb-4 drop-shadow-md"></i>
+                        <h3 class="font-bold text-slate-800 text-lg mb-2">Production Completed</h3>
+                        <div class="grid grid-cols-2 gap-3 mt-4">
+                            <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+                                <div class="text-[10px] font-bold text-emerald-800 uppercase">Final OEE Efficiency</div>
+                                <div class="text-2xl font-bold text-emerald-600">95.2%</div>
+                            </div>
+                            <div class="bg-emerald-50 border border-emerald-200 rounded-lg p-3">
+                                <div class="text-[10px] font-bold text-emerald-800 uppercase">Defect (Vision AI)</div>
+                                <div class="text-2xl font-bold text-emerald-600">0 Units</div>
+                            </div>
+                        </div>
+                        <div class="mt-4 text-xs text-left bg-slate-50 p-3 rounded border border-slate-200 text-slate-700 font-medium">
+                            <i class="fa-solid fa-info-circle text-emerald-500 mr-2"></i> Finished goods transferred to Smart Warehouse.
+                        </div>
+                    </div>`;
+                action = `<button class="w-full bg-brand-600 text-white text-xs font-bold py-3.5 rounded-lg hover:bg-brand-700 transition shadow-md" onclick="window.closeSimModal(); window.selectAppModule(6)">ส่งสินค้าเข้าคลังรอจัดส่ง (ไป Stage 6) <i class="fa-solid fa-arrow-right ml-1"></i></button>`;
+                window.openSimModal('MES & IoT Operations', body, action);
+            }
+            else if (stageId === 6) {
+                 body = `
+                    <div class="text-center">
+                        <i class="fa-solid fa-truck-fast text-6xl text-cyan-500 mb-4 drop-shadow-md"></i>
+                        <h3 class="font-bold text-slate-800 text-lg mb-2">Logistics API Executed</h3>
+                        <div class="bg-slate-800 text-cyan-400 font-mono text-xs p-4 rounded-lg text-left shadow-inner mb-3 leading-relaxed">
+                            [WMS] > Payment Reconciled. Pallet A-12 unlocked.<br>
+                            [API] > Calling 3PL Provider (DHL/Kerry)...<br>
+                            [API] > Waybill generated: <strong>TH-88219902X</strong><br>
+                            [CRM] > SMS Tracking sent to Khun Aura.
+                        </div>
+                        <div class="bg-cyan-50 border border-cyan-200 text-cyan-800 text-xs p-3 rounded-lg font-bold">
+                            <i class="fa-solid fa-check-circle mr-2"></i> สินค้าพร้อมจัดส่งถึงมือลูกค้าอย่างปลอดภัย
+                        </div>
+                    </div>`;
+                action = `<button class="w-full bg-brand-600 text-white text-xs font-bold py-3.5 rounded-lg hover:bg-brand-700 transition-all shadow-md" onclick="window.closeSimModal(); window.selectAppModule(7)">ดูแลหลังการขายเพื่อต่อยอดธุรกิจ (ไป Stage 7) <i class="fa-solid fa-arrow-right ml-1"></i></button>`;
+                window.openSimModal('Automated Dispatch', body, action);
+            }
+            else if (stageId === 7) {
+                body = `
+                    <div class="text-center">
+                        <i class="fa-solid fa-bullseye text-6xl text-purple-500 mb-4 drop-shadow-md"></i>
+                        <h3 class="font-bold text-slate-800 text-lg mb-2">Proactive Engagement Executed</h3>
+                        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 text-left text-xs text-slate-700">
+                            <p class="mb-3"><i class="fa-solid fa-envelope text-purple-500 mr-2"></i><strong>Auto-Email Sent:</strong> "Your Serum stock is running low. Re-order now to secure production queue."</p>
+                            <p><i class="fa-solid fa-phone text-purple-500 mr-2"></i><strong>Task for KAM:</strong> Call Khun Aura to discuss Q3 new product line expansion (Sunscreen).</p>
+                        </div>
+                    </div>`;
+                action = `<button class="w-full bg-slate-800 text-white text-xs font-bold py-3.5 rounded-xl hover:bg-slate-900 transition shadow-md" onclick="window.closeSimModal(); window.selectAppModule(1)"><i class="fa-solid fa-rotate-right mr-2"></i> กลับไปเริ่มต้น Cycle ใหม่อีกครั้ง</button>`;
+                window.openSimModal('BI & Customer Retention', body, action);
+            }
+        };
+
+        window.renderSimulator = function() {
+            const moduleId = window.appState.simModule;
+            const config = appModulesConfig[moduleId];
+            if(!config) return;
+
+            const t = config.theme;
+            
+            // 1. Render Left Sidebar Navigation
+            const sidebarNav = document.getElementById('simulator-sidebar-nav');
+            if (sidebarNav) {
+                let navHTML = '';
+                for (let i = 1; i <= 7; i++) {
+                    const navConfig = appModulesConfig[i];
+                    const isActive = i === moduleId;
+                    const nt = navConfig.theme;
+                    
+                    if (isActive) {
+                        navHTML += `
+                            <button onclick="window.selectAppModule(${i})" class="w-full flex flex-col md:flex-row items-center px-4 py-3.5 ${nt.borderL} bg-slate-800/80 backdrop-blur-md text-white transition-all group text-left shadow-md border-y border-white/5">
+                                <i class="fa-solid ${navConfig.icon} text-lg md:w-8 md:text-center ${nt.icon} drop-shadow-sm"></i>
+                                <div class="hidden md:block ml-2">
+                                    <span class="font-ui text-[11px] font-bold block tracking-wide">${navConfig.shortTitle}</span>
+                                </div>
+                            </button>
+                        `;
+                    } else {
+                        navHTML += `
+                            <button onclick="window.selectAppModule(${i})" class="w-full flex flex-col md:flex-row items-center px-4 py-3 border-l-4 border-transparent text-slate-400 hover:bg-slate-800/40 hover:text-white transition-all group text-left">
+                                <i class="fa-solid ${navConfig.icon} text-lg md:w-8 md:text-center ${nt.hover} transition-colors"></i>
+                                <div class="hidden md:block ml-2">
+                                    <span class="font-ui text-[11px] font-medium block tracking-wide">${navConfig.shortTitle}</span>
+                                </div>
+                            </button>
+                        `;
+                    }
+                }
+                sidebarNav.innerHTML = navHTML;
+            }
+
+            // 2. Set Role Badge
+            const roleEl = document.getElementById('app-user-role');
+            if (roleEl) roleEl.innerHTML = `<i class="fa-regular fa-id-badge mr-1"></i> Role: <span class="font-bold text-slate-800 ml-1">${config.role}</span>`;
+
+            // 3. Render Main Content Area
+            const contentArea = document.getElementById('simulator-content-area');
+            
+            contentArea.innerHTML = `
+                <!-- Top Header for Module -->
+                <div class="bg-white/90 backdrop-blur-md px-6 py-4 border-b border-slate-200 shrink-0 shadow-sm z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl flex items-center justify-center text-xl shadow-sm border border-slate-100 ${t.bg} ${t.text}">
+                            <i class="fa-solid ${config.icon}"></i>
+                        </div>
+                        <div>
+                            <h2 class="text-xl font-ui font-bold text-slate-900 drop-shadow-sm">${config.title}</h2>
+                            <p class="text-xs text-slate-500 font-medium mt-0.5"><i class="fa-solid fa-play text-[10px] mr-1 text-slate-400"></i> Trigger: <span class="text-slate-700">${config.trigger}</span></p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Split View: Mockup & Explanation -->
+                <div class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
+                    
+                    <!-- Left Panel: Interactive Mockup -->
+                    <div id="system-interface-panel" class="w-full md:w-[45%] lg:w-[40%] bg-slate-200/50 border-b md:border-r border-slate-300 relative flex flex-col transition-all duration-300 ${window.appState.isFocusMode ? 'focus-active' : ''}">
+                        <div class="header-bar bg-slate-300/50 px-4 py-2 text-[10px] font-bold text-slate-600 uppercase tracking-widest border-b border-slate-300 flex justify-between items-center shrink-0 transition-colors">
+                            <span><i class="fa-solid fa-desktop mr-1"></i> System Interface</span>
+                            <div class="flex gap-3 items-center">
+                                <button onclick="window.toggleFocusMode()" class="focus:outline-none hover:scale-110 transition-transform" title="ขยายหน้าจอ (Focus Mode)">
+                                    <i id="focus-icon" class="fa-solid ${window.appState.isFocusMode ? 'fa-compress' : 'fa-expand'} text-slate-500 text-sm hover:text-brand-600 transition-colors"></i>
+                                </button>
+                                <span class="flex gap-1"><span class="w-2 h-2 rounded-full bg-slate-400"></span><span class="w-2 h-2 rounded-full bg-slate-400"></span></span>
+                            </div>
+                        </div>
+                        <div class="flex-1 p-2 md:p-4 overflow-y-auto custom-scrollbar flex items-center justify-center">
+                            <div id="ui-concept-wrapper" class="w-full h-full transition-all duration-300 mx-auto">
+                                <div class="bg-white rounded-xl shadow-md border border-slate-200 overflow-hidden flex flex-col h-full">
+                                    ${config.uiConcept}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Right Panel: Automations & Workload Reduction -->
+                    <div class="w-full md:w-[55%] lg:w-[60%] bg-white/60 flex flex-col overflow-hidden">
+                        <div class="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-6">
+                            
+                            <!-- Plug-in Detail -->
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-800 flex items-center mb-4 pb-2 border-b border-slate-200">
+                                    <div class="w-7 h-7 rounded bg-emerald-100 text-emerald-600 flex items-center justify-center mr-3"><i class="fa-solid fa-bolt"></i></div>
+                                    ระบบหลังบ้าน ทำงานอัตโนมัติอย่างไร? (Plug-in Magic)
+                                </h3>
+                                <div class="bg-slate-50 border border-slate-200 p-5 rounded-xl shadow-sm">
+                                    ${config.pluginDetail}
+                                </div>
+                            </div>
+
+                            <!-- ROI / Reduce Work -->
+                            <div>
+                                <h3 class="text-sm font-bold text-slate-800 flex items-center mb-4 pb-2 border-b border-slate-200">
+                                    <div class="w-7 h-7 rounded bg-brand-100 text-brand-600 flex items-center justify-center mr-3"><i class="fa-solid fa-arrow-trend-down"></i></div>
+                                    ช่วยลดภาระงานคนได้อย่างไร? (Human Workload Reduction)
+                                </h3>
+                                <div class="bg-brand-50 border border-brand-200 p-5 rounded-xl shadow-sm text-sm text-brand-900 font-medium leading-relaxed">
+                                    <i class="fa-solid fa-quote-left text-brand-300 mr-2 text-lg"></i>
+                                    ${config.reduceWork}
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            // Run CPQ Calculation if Stage 2 is rendered
+            if (moduleId === 2) {
+                window.calculateMargin();
+            }
+        };
+
+        window.selectAppModule = function(moduleId) {
+            window.appState.simModule = moduleId;
+            window.renderSimulator();
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            window.renderSimulator();
+        });
+    </script>
+</body>
+</html>
