@@ -92,56 +92,6 @@
         @keyframes pulse-fast { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
         .animate-pulse-fast { animation: pulse-fast 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite; }
         @keyframes scaleX { 0% { transform: scaleX(0); } 50% { transform: scaleX(1); } 100% { transform: scaleX(0); transform-origin: right; } }
-        
-        /* Focus Mode Styles */
-        #system-interface-panel.focus-active {
-            position: fixed !important;
-            top: 0;
-            left: 0;
-            width: 100vw !important;
-            height: 100vh !important;
-            z-index: 9000 !important;
-            background: rgba(15, 23, 42, 0.85) !important;
-            backdrop-filter: blur(12px) !important;
-            border: none !important;
-            border-radius: 0 !important;
-        }
-        #system-interface-panel.focus-active .header-bar {
-            background: #1e293b !important;
-            color: #f8fafc !important;
-            border-bottom: 1px solid #334155 !important;
-            padding: 1rem 1.5rem !important;
-            font-size: 0.875rem !important; /* text-sm */
-        }
-        #system-interface-panel.focus-active #focus-icon {
-            color: #f8fafc !important;
-            transform: scale(1.2);
-        }
-        #system-interface-panel.focus-active #focus-icon:hover {
-            color: #3b82f6 !important;
-        }
-        
-        /* ป้องกันจอเกินขอบ และปรับระยะขอบ (Padding) ให้อ่านง่าย */
-        #system-interface-panel.focus-active > div.flex-1 {
-            padding: 2.5rem !important; /* ระยะขอบสำหรับจอคอม */
-            display: flex !important;
-            align-items: center !important;
-            justify-content: center !important;
-        }
-        @media (max-width: 768px) {
-            #system-interface-panel.focus-active > div.flex-1 {
-                padding: 1rem !important; /* ระยะขอบสำหรับมือถือ/แท็บเล็ต */
-            }
-        }
-        
-        #system-interface-panel.focus-active #ui-concept-wrapper {
-            max-width: 900px !important;
-            width: 100% !important;
-            height: 100% !important; /* ยืดหดพอดีขอบ Padding 100% ทำให้ไม่ล้นจอ */
-            max-height: 850px !important; /* ป้องกันหน้าจอยืดเกินไปในจอแนวตั้งยาวๆ */
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5) !important;
-            transition: all 0.3s ease;
-        }
     </style>
 </head>
 <body class="antialiased">
@@ -210,11 +160,11 @@
             <div class="flex flex-1 overflow-hidden bg-slate-50/50">
                 
                 <!-- Left Sidebar -->
-                <div class="w-[75px] md:w-64 glass-dark flex flex-col shrink-0 border-r border-slate-800/50 shadow-inner z-20">
+                <div id="simulator-sidebar" class="w-[75px] md:w-64 glass-dark flex flex-col shrink-0 border-r border-slate-800/50 shadow-inner z-20 transition-all duration-300 ease-in-out overflow-hidden">
                     <div class="p-4 border-b border-slate-800/50 hidden md:block">
-                        <h3 class="text-white font-ui font-bold text-[10px] uppercase tracking-widest text-slate-400">Customer Journey 7 Steps</h3>
+                        <h3 class="text-white font-ui font-bold text-[10px] uppercase tracking-widest text-slate-400 whitespace-nowrap">Customer Journey</h3>
                     </div>
-                    <div class="flex-1 overflow-y-auto py-2 sidebar-scroll" id="simulator-sidebar-nav">
+                    <div class="flex-1 overflow-y-auto py-2 sidebar-scroll overflow-x-hidden" id="simulator-sidebar-nav">
                         <!-- Injected via JS -->
                     </div>
                 </div>
@@ -253,8 +203,13 @@
 
     <script>
         // 1. STATE & THEMES
-        window.appState = { simModule: 1, isFocusMode: false };
-        
+        window.appState = { simModule: 1, isRightPanelOpen: true };
+
+        window.toggleRightPanel = function() {
+            window.appState.isRightPanelOpen = !window.appState.isRightPanelOpen;
+            window.renderSimulator();
+        };
+
         const themes = {
             blue: { borderL: "border-l-4 border-blue-500", icon: "text-blue-400", hover: "group-hover:text-blue-400", bg: "bg-blue-50", text: "text-blue-700", btn: "bg-blue-600 hover:bg-blue-700" },
             amber: { borderL: "border-l-4 border-amber-500", icon: "text-amber-400", hover: "group-hover:text-amber-400", bg: "bg-amber-50", text: "text-amber-700", btn: "bg-amber-500 hover:bg-amber-600" },
@@ -472,8 +427,8 @@
             },
             4: {
                 role: "Regulatory Affairs (RA)", theme: themes.rose, icon: "fa-file-shield", 
-                shortTitle: "4. Regulatory (NLP)", title: "AI Compliance & RPA Submission", 
-                trigger: "สูตรนิ่ง ฝ่ายอาร์ตเวิร์คส่งไฟล์กล่อง (Artwork) ให้ตรวจความถูกต้อง",
+                shortTitle: "4. Regulatory (NLP)", title: "AI FDA Compliance & RPA e-Submission", 
+                trigger: "สูตรนิ่ง ฝ่ายอาร์ตเวิร์คส่งไฟล์ Packaging ให้ RA ตรวจก่อนยื่น อย.",
                 uiConcept: `
                     <div class="h-full flex flex-col p-4 bg-slate-100">
                         <div class="bg-white rounded-lg shadow-sm p-4 mb-3 border border-slate-200 flex flex-col items-center justify-center flex-1 relative overflow-hidden">
@@ -481,19 +436,19 @@
                             <div class="text-[10px] text-slate-500 font-medium bg-slate-100 px-3 py-1 rounded-full">Artwork_AuraSerum_V1.pdf</div>
                             <div class="mt-4 text-[11px] italic text-slate-700 text-center px-4 leading-loose">
                                 "เซรั่มหน้า<span class="text-rose-500 font-bold border-b border-rose-500 border-dashed">ขาวทันทีใน 3 วัน</span><br>
-                                การันตีผลลัพธ์ <span class="text-rose-500 font-bold border-b border-rose-500 border-dashed">เปลี่ยนพันธุกรรมผิว</span>"
+                                การันตีผลลัพธ์ <span class="text-rose-500 font-bold border-b border-rose-500 border-dashed">รักษาฝ้าและสิวเด็ดขาด</span>"
                             </div>
                             
                             <!-- Scanning Laser Animation -->
                             <div class="absolute inset-0 bg-rose-500/10 border-t-2 border-rose-500 hidden z-10" id="scan-box-4" style="animation: scan 1.5s linear infinite;"></div>
                         </div>
                         <button class="w-full bg-rose-600 text-white text-xs font-bold py-3 rounded-lg hover:bg-rose-700 transition shadow-md flex items-center justify-center shrink-0" onclick="window.appActions.runStage4Scan()">
-                            <i class="fa-solid fa-magnifying-glass-chart mr-2"></i> สแกนคำโฆษณาผิดกฎหมาย & ยื่น อย.
+                            <i class="fa-solid fa-magnifying-glass-chart mr-2"></i> สแกนคำโฆษณาผิดกฎหมาย & ยื่น อย. (e-Submission)
                         </button>
                     </div>
                 `,
-                pluginDetail: "<div class='biz-step'><strong>AI OCR & NLP:</strong> ระบบแปลงภาพ Artwork เป็นตัวอักษร และสแกนเทียบกับฐานข้อมูลคำต้องห้ามของ อย. แบบคำต่อคำ</div><div class='biz-step'><strong>Auto-Flagging:</strong> ไฮไลท์คำที่เสี่ยงต่อการเคลมเกินจริง (Overclaim) และแนะนำคำที่ปลอดภัยให้ฝ่ายกราฟิกแก้ไขทันที</div><div class='biz-step'><strong>RPA e-Submission:</strong> เมื่อเอกสารผ่านหมด หุ่นยนต์ซอฟต์แวร์ (RPA) จะนำข้อมูลไปกรอกลงในเว็บไซต์ของ อย. เพื่อจดแจ้งให้อัตโนมัติ</div>",
-                reduceWork: "เจ้าหน้าที่กฎหมายไม่ต้องใช้สายตาเพ่งอ่านคำโฆษณาบนกล่องทีละตัวอักษร ป้องกันความผิดพลาด 100% และลดเวลาคีย์ฟอร์มจดแจ้ง อย. ด้วยมือ"
+                pluginDetail: "<div class='biz-step'><strong>AI OCR & NLP (อ้างอิงฐานข้อมูล อย.):</strong> ระบบอ่านข้อความบน Artwork และสแกนเทียบกับ 'คู่มือแนวทางการโฆษณาเครื่องสำอาง' ของ อย. เพื่อดักจับคำห้ามใช้ (Overclaim) แบบคำต่อคำ</div><div class='biz-step'><strong>Auto-Flagging & Suggestion:</strong> ไฮไลท์คำที่เสี่ยงฝ่าฝืน พ.ร.บ. เครื่องสำอาง พ.ศ. 2558 และแนะนำคำที่ปลอดภัยให้กราฟิกแก้ไขทันที</div><div class='biz-step'><strong>RPA Thai FDA e-Submission:</strong> เมื่อเอกสารผ่านหมด หุ่นยนต์ซอฟต์แวร์ (RPA) จะเข้าสู่ระบบ OSSC (Skynet) ของ อย. เพื่อกรอกฟอร์มคำขอจดแจ้งให้อัตโนมัติ</div>",
+                reduceWork: "เจ้าหน้าที่ RA ไม่ต้องใช้สายตาเพ่งจับผิดคำโฆษณา ป้องกันความผิดพลาดจากการถูก อย. ตีกลับ (ซึ่งปกติเสียเวลา 3-15 วัน) และลดเวลาการคีย์ข้อมูลลงเว็บ อย. ด้วยมือ"
             },
             
             5: {
@@ -542,37 +497,43 @@
                 reduceWork: "ยกเลิกการใช้กระดาษจดคิวงานหน้าเครื่อง (Paperless Shopfloor) ลูกค้ารู้สึกอุ่นใจที่ติดตามสถานะสินค้าตนเองได้ตลอดเวลา ลดภาระฝ่ายดูแลลูกค้า"
             },
             6: {
-                role: "Logistics Manager", theme: themes.cyan, icon: "fa-boxes-packing", 
-                shortTitle: "6. Logistics (WMS)", title: "WMS Pro & 3PL API Dispatch", 
-                trigger: "สินค้าบรรจุเสร็จเข้าคลัง WMS จัดการการจัดส่ง",
+                role: "Fulfillment & Logistics", theme: themes.cyan, icon: "fa-boxes-packing", 
+                shortTitle: "6. Fulfillment (WMS)", title: "Temp-Control WMS & Dropship", 
+                trigger: "สินค้าผลิตเสร็จเข้าคลัง แบรนด์ต้องการให้โรงงานแพ็คและจัดส่งแทน (Fulfillment)",
                 uiConcept: `
                     <div class="h-full flex flex-col p-4 bg-slate-100">
                         <div class="bg-white rounded-xl shadow-sm p-3 mb-3 border-l-4 border-cyan-500">
                             <div class="flex justify-between items-center border-b pb-2 mb-2">
-                                <div><div class="text-xs font-bold text-slate-800">Order: #ORD-992</div><div class="text-[10px] text-slate-500">Aura Serum 10k Units</div></div>
-                                <span class="bg-cyan-100 text-cyan-700 text-[10px] px-2 py-1 rounded font-bold"><i class="fa-solid fa-boxes-stacked mr-1"></i> Ready</span>
+                                <div><div class="text-[11px] font-bold text-slate-800"><i class="fa-solid fa-snowflake text-cyan-500 mr-1"></i> Cosmetics Cold Storage</div><div class="text-[10px] text-slate-500">Zone A • Temp: 22.5°C</div></div>
+                                <span class="bg-cyan-100 text-cyan-700 text-[9px] px-2 py-1 rounded font-bold"><i class="fa-solid fa-check"></i> Optimal</span>
                             </div>
-                            <!-- Mini WMS Map -->
-                            <div class="text-[10px] text-slate-600 font-bold mb-1"><i class="fa-solid fa-map-location-dot text-cyan-500 mr-1"></i> Location: Zone A (Rack 12)</div>
-                            <div class="w-full bg-slate-100 h-12 rounded-lg border border-slate-200 flex p-1 gap-1">
-                                <div class="h-full w-1/4 bg-slate-200 rounded"></div>
-                                <div class="h-full w-1/4 bg-cyan-400 rounded animate-pulse shadow-sm flex items-center justify-center text-[8px] text-white font-bold">A-12</div>
-                                <div class="h-full w-1/4 bg-slate-200 rounded"></div>
-                                <div class="h-full w-1/4 bg-slate-200 rounded"></div>
+                            <!-- Fulfillment Order Details -->
+                            <div class="text-[10px] text-slate-600 font-bold mb-1.5 flex justify-between items-center">
+                                <span class="bg-orange-100 text-orange-600 px-1.5 py-0.5 rounded"><i class="fa-brands fa-shopee mr-1"></i>Shopee Order</span>
+                                <span class="text-rose-500 border border-rose-200 px-1.5 py-0.5 rounded bg-rose-50">FEFO Pick: Lot #L2605</span>
+                            </div>
+                            <div class="bg-slate-50 border border-slate-200 rounded p-2 text-[10px] text-slate-600 flex items-center">
+                                <i class="fa-solid fa-box-open text-slate-400 mr-2 text-lg"></i> 
+                                <div>
+                                    <div class="font-bold">Aura Serum 30ml (1 unit)</div>
+                                    <div class="text-[9px] text-slate-400">+ Premium Packaging & Bubble Wrap</div>
+                                </div>
                             </div>
                         </div>
-                        <div class="bg-slate-800 p-3 rounded-xl text-[11px] mb-4 flex-1 text-cyan-300 font-mono border border-slate-700 shadow-inner flex flex-col justify-center">
-                            > [Finance] Payment cleared.<br>
-                            > [WMS] Pallet A-12 Unlocked.<br>
-                            > [3PL API] Awaiting Transport Request...
+                        <div class="bg-slate-800 p-3 rounded-xl text-[10px] mb-4 flex-1 text-cyan-300 font-mono border border-slate-700 shadow-inner flex flex-col justify-center leading-relaxed">
+                            > [Marketplace API] New B2C order synced.<br>
+                            > [WMS] FEFO validation passed. Allocating stock...<br>
+                            > [Quality] Temp log 22.5°C verified.<br>
+                            > [Fulfillment] Pick & Pack completed.<br>
+                            > [3PL API] Kerry Express tracking generated.
                         </div>
-                        <button class="w-full bg-cyan-600 text-white text-xs font-bold py-3.5 rounded-xl hover:bg-cyan-700 transition shadow-md flex items-center justify-center shrink-0" onclick="window.showSimLoading('Routing & API Call to 3PL...', () => window.triggerModal(6))">
-                            <i class="fa-solid fa-truck-fast mr-2"></i> ยิง API เรียกรถขนส่ง & พิมพ์ใบปะหน้า
+                        <button class="w-full bg-cyan-600 text-white text-xs font-bold py-3.5 rounded-xl hover:bg-cyan-700 transition shadow-md flex items-center justify-center shrink-0" onclick="window.showSimLoading('Syncing Fulfillment & 3PL API...', () => window.triggerModal(6))">
+                            <i class="fa-solid fa-truck-fast mr-2"></i> แพ็คสินค้า & ยิง API เรียกรถขนส่ง (Dropship)
                         </button>
                     </div>
                 `,
-                pluginDetail: "<div class='biz-step'><strong>WMS Put-away & Picking:</strong> ระบบคลังสินค้าอัจฉริยะชี้เป้าหมายจัดเก็บ (Zone/Rack) และหาเส้นทางหยิบของที่สั้นที่สุดให้พนักงาน</div><div class='biz-step'><strong>AI Financial Recon:</strong> AI อ่านสลิปโอนเงินจับคู่ Invoice อัตโนมัติ ทันทีที่บัญชีตัดยอด ระบบคลังจะปลดล็อกให้แพ็คของได้ทันที</div><div class='biz-step'><strong>3PL API Integration:</strong> ยิง API เรียกรถขนส่ง (DHL/Kerry) พิมพ์ใบปะหน้าและยิง SMS แจ้ง Tracking ให้ลูกค้าอัตโนมัติ</div>",
-                reduceWork: "สินค้าไม่ติดแหง็กในคลังระหว่างรออนุมัติข้ามแผนก ลดเวลาพิมพ์ใบปะหน้าด้วยมือ ป้องกันสินค้าสูญหายหรือหาไม่เจอด้วยแผนที่คลังอัจฉริยะ"
+                pluginDetail: "<div class='biz-step'><strong>Temp-Controlled WMS & FEFO:</strong> จัดการคลังสินค้าควบคุมอุณหภูมิสำหรับเครื่องสำอางโดยเฉพาะ พร้อมระบบจ่ายสินค้าตามวันหมดอายุก่อน-หลัง (FEFO - First Expire, First Out) อัตโนมัติ</div><div class='biz-step'><strong>Marketplace API Integration:</strong> เชื่อมต่อระบบตะกร้าสินค้าของลูกค้า (Shopee/TikTok/Line) เข้าคลังโรงงานโดยตรง มีออเดอร์ปุ๊บ คลังแพ็คให้ทันที (Dropship)</div><div class='biz-step'><strong>3PL Smart Dispatch:</strong> ยิง API เรียกรถขนส่ง (Kerry/DHL/SCG) พิมพ์ใบปะหน้า และส่ง Tracking Number ให้ผู้บริโภคปลายทางอัตโนมัติ</div>",
+                reduceWork: "เจ้าของแบรนด์ไม่ต้องลงทุนสร้างโกดังติดแอร์ ไม่ต้องปวดหัวกับการจ้างพนักงานแพ็คของ และลดความเสี่ยงสินค้าเสื่อมสภาพจากการจัดเก็บผิดวิธี สามารถนำเวลาไปโฟกัสที่การทำการตลาดและไลฟ์ขายของได้อย่างเต็มที่"
             },
             7: {
                 role: "Key Account Manager", theme: themes.purple, icon: "fa-chart-pie", 
@@ -670,35 +631,11 @@
             }
         };
 
-        window.toggleFocusMode = function() {
-            window.appState.isFocusMode = !window.appState.isFocusMode;
-            const panel = document.getElementById('system-interface-panel');
-            const icon = document.getElementById('focus-icon');
-            
-            if (!panel) return;
-
-            if (window.appState.isFocusMode) {
-                // Turn ON Focus Mode
-                panel.classList.add('focus-active');
-                if(icon) {
-                    icon.classList.remove('fa-expand');
-                    icon.classList.add('fa-compress');
-                }
-            } else {
-                // Turn OFF Focus Mode
-                panel.classList.remove('focus-active');
-                if(icon) {
-                    icon.classList.remove('fa-compress');
-                    icon.classList.add('fa-expand');
-                }
-            }
-        };
-
         window.appActions = {
             runStage4Scan: function() {
                 const scanBox = document.getElementById('scan-box-4');
                 if (scanBox) scanBox.classList.remove('hidden');
-                window.showSimLoading('AI Scanning FDA Database...', () => window.triggerModal(4));
+                window.showSimLoading('AI Scanning Thai FDA Database...', () => window.triggerModal(4));
             },
             signQuotation: function(btn) {
                 btn.innerHTML = '<i class="fa-solid fa-fingerprint text-lg mr-2"></i> อนุมัติด้วย Digital Signature เรียบร้อย';
@@ -904,17 +841,18 @@
                 body = `
                     <div class="text-center">
                         <i class="fa-solid fa-file-circle-check text-6xl text-rose-500 mb-4 drop-shadow-md"></i>
-                        <h3 class="font-bold text-slate-800 text-lg mb-2">AI Compliance Verification</h3>
+                        <h3 class="font-bold text-slate-800 text-lg mb-2">Thai FDA Compliance Verified</h3>
                         <div class="bg-rose-50 border border-rose-200 rounded-lg p-4 text-left text-xs text-slate-700">
-                            <p class="text-rose-600 font-bold mb-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Issue Found on Packaging Text:</p>
-                            <p class="line-through text-slate-500 ml-5">"ขาวทันทีใน 3 วัน เปลี่ยนพันธุกรรมผิว"</p>
-                            <p class="text-emerald-600 font-bold mt-3"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> AI Suggested Correction:</p>
-                            <p class="ml-5">"แลดูกระจ่างใสขึ้นอย่างเป็นธรรมชาติ เมื่อใช้ต่อเนื่อง"</p>
+                            <p class="text-rose-600 font-bold mb-1"><i class="fa-solid fa-triangle-exclamation mr-1"></i> พบคำเคลมเกินจริง (ฝ่าฝืน พ.ร.บ. เครื่องสำอาง 2558):</p>
+                            <p class="line-through text-slate-500 ml-5">"ขาวทันทีใน 3 วัน รักษาฝ้าและสิวเด็ดขาด"</p>
+                            <p class="text-emerald-600 font-bold mt-3"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> AI เสนอคำที่ผ่านกฎหมาย อย. ไทย:</p>
+                            <p class="ml-5">"แลดูกระจ่างใสขึ้นอย่างเป็นธรรมชาติ เมื่อใช้เป็นประจำ"</p>
                             <hr class="my-3 border-rose-200">
-                            <p class="text-slate-800 font-bold"><i class="fa-solid fa-robot text-rose-500 mr-2"></i>RPA submitted corrected Dossier to Thai FDA E-Submission.</p>
+                            <p class="text-slate-800 font-bold"><i class="fa-solid fa-robot text-rose-500 mr-2"></i>RPA ยื่นฟอร์มเข้าระบบ e-Submission OSSC</p>
+                            <p class="text-emerald-600 font-bold mt-1 text-[10px]"><i class="fa-solid fa-barcode mr-1"></i> ได้รับเลขที่ใบรับจดแจ้ง 13 หลักเรียบร้อยแล้ว</p>
                         </div>
                     </div>`;
-                action = `<button class="w-full bg-brand-600 text-white text-xs font-bold py-3.5 rounded-lg hover:bg-brand-700 transition shadow-md" onclick="window.closeSimModal(); window.selectAppModule(5)">อนุมัติแล้ว! โยนออเดอร์ลงโรงงานผลิต (ไป Stage 5) <i class="fa-solid fa-arrow-right ml-1"></i></button>`;
+                action = `<button class="w-full bg-brand-600 text-white text-xs font-bold py-3.5 rounded-lg hover:bg-brand-700 transition shadow-md" onclick="window.closeSimModal(); window.selectAppModule(5)">ได้เลข อย. แล้ว! โยนออเดอร์ลงโรงงานผลิต (ไป Stage 5) <i class="fa-solid fa-arrow-right ml-1"></i></button>`;
                 window.openSimModal('Legal & Regulatory Automation', body, action);
             }
             else if (stageId === 5) {
@@ -942,20 +880,20 @@
             else if (stageId === 6) {
                  body = `
                     <div class="text-center">
-                        <i class="fa-solid fa-truck-fast text-6xl text-cyan-500 mb-4 drop-shadow-md"></i>
-                        <h3 class="font-bold text-slate-800 text-lg mb-2">Logistics API Executed</h3>
-                        <div class="bg-slate-800 text-cyan-400 font-mono text-xs p-4 rounded-lg text-left shadow-inner mb-3 leading-relaxed">
-                            [WMS] > Payment Reconciled. Pallet A-12 unlocked.<br>
-                            [API] > Calling 3PL Provider (DHL/Kerry)...<br>
-                            [API] > Waybill generated: <strong>TH-88219902X</strong><br>
-                            [CRM] > SMS Tracking sent to Khun Aura.
+                        <i class="fa-solid fa-box-open text-6xl text-cyan-500 mb-4 drop-shadow-md"></i>
+                        <h3 class="font-bold text-slate-800 text-lg mb-2">Fulfillment & 3PL Executed</h3>
+                        <div class="bg-slate-800 text-cyan-400 font-mono text-[10px] p-4 rounded-lg text-left shadow-inner mb-3 leading-relaxed">
+                            [WMS] > Temp Log: 22.5°C (Quality OK)<br>
+                            [WMS] > FEFO Lot L2605 Deducted: -1 Unit<br>
+                            [API] > Kerry Express Waybill: <strong>KEX-88219902X</strong><br>
+                            [CRM] > Tracking SMS sent to end-consumer.
                         </div>
                         <div class="bg-cyan-50 border border-cyan-200 text-cyan-800 text-xs p-3 rounded-lg font-bold">
-                            <i class="fa-solid fa-check-circle mr-2"></i> สินค้าพร้อมจัดส่งถึงมือลูกค้าอย่างปลอดภัย
+                            <i class="fa-solid fa-check-circle mr-2"></i> สินค้าถูกแพ็คในอุณหภูมิที่เหมาะสม และจัดส่งถึงมือผู้บริโภคโดยตรง
                         </div>
                     </div>`;
                 action = `<button class="w-full bg-brand-600 text-white text-xs font-bold py-3.5 rounded-lg hover:bg-brand-700 transition-all shadow-md" onclick="window.closeSimModal(); window.selectAppModule(7)">ดูแลหลังการขายเพื่อต่อยอดธุรกิจ (ไป Stage 7) <i class="fa-solid fa-arrow-right ml-1"></i></button>`;
-                window.openSimModal('Automated Dispatch', body, action);
+                window.openSimModal('Automated Dispatch & Fulfillment', body, action);
             }
             else if (stageId === 7) {
                 body = `
@@ -992,7 +930,7 @@
                         navHTML += `
                             <button onclick="window.selectAppModule(${i})" class="w-full flex flex-col md:flex-row items-center px-4 py-3.5 ${nt.borderL} bg-slate-800/80 backdrop-blur-md text-white transition-all group text-left shadow-md border-y border-white/5">
                                 <i class="fa-solid ${navConfig.icon} text-lg md:w-8 md:text-center ${nt.icon} drop-shadow-sm"></i>
-                                <div class="hidden md:block ml-2">
+                                <div class="hidden md:block ml-2 whitespace-nowrap overflow-hidden text-ellipsis">
                                     <span class="font-ui text-[11px] font-bold block tracking-wide">${navConfig.shortTitle}</span>
                                 </div>
                             </button>
@@ -1001,7 +939,7 @@
                         navHTML += `
                             <button onclick="window.selectAppModule(${i})" class="w-full flex flex-col md:flex-row items-center px-4 py-3 border-l-4 border-transparent text-slate-400 hover:bg-slate-800/40 hover:text-white transition-all group text-left">
                                 <i class="fa-solid ${navConfig.icon} text-lg md:w-8 md:text-center ${nt.hover} transition-colors"></i>
-                                <div class="hidden md:block ml-2">
+                                <div class="hidden md:block ml-2 whitespace-nowrap overflow-hidden text-ellipsis">
                                     <span class="font-ui text-[11px] font-medium block tracking-wide">${navConfig.shortTitle}</span>
                                 </div>
                             </button>
@@ -1017,6 +955,7 @@
 
             // 3. Render Main Content Area
             const contentArea = document.getElementById('simulator-content-area');
+            let sysWidthClass = window.appState.isRightPanelOpen ? 'w-full md:w-[45%] lg:w-[40%] border-b md:border-r' : 'w-full flex-1';
             
             contentArea.innerHTML = `
                 <!-- Top Header for Module -->
@@ -1036,14 +975,16 @@
                 <div class="flex-1 flex flex-col md:flex-row overflow-hidden relative">
                     
                     <!-- Left Panel: Interactive Mockup -->
-                    <div id="system-interface-panel" class="w-full md:w-[45%] lg:w-[40%] bg-slate-200/50 border-b md:border-r border-slate-300 relative flex flex-col transition-all duration-300 ${window.appState.isFocusMode ? 'focus-active' : ''}">
+                    <div id="system-interface-panel" class="${sysWidthClass} bg-slate-200/50 border-slate-300 relative flex flex-col transition-all duration-300">
                         <div class="header-bar bg-slate-300/50 px-4 py-2 text-[10px] font-bold text-slate-600 uppercase tracking-widest border-b border-slate-300 flex justify-between items-center shrink-0 transition-colors">
                             <span><i class="fa-solid fa-desktop mr-1"></i> System Interface</span>
-                            <div class="flex gap-3 items-center">
-                                <button onclick="window.toggleFocusMode()" class="focus:outline-none hover:scale-110 transition-transform" title="ขยายหน้าจอ (Focus Mode)">
-                                    <i id="focus-icon" class="fa-solid ${window.appState.isFocusMode ? 'fa-compress' : 'fa-expand'} text-slate-500 text-sm hover:text-brand-600 transition-colors"></i>
+                            <div class="flex gap-2.5 items-center">
+                                <!-- ปุ่มเปิดปิดแผงคำบรรยายขวามือแบบเห็นชัดเจน -->
+                                <button onclick="window.toggleRightPanel()" class="flex items-center gap-1.5 px-2.5 py-1 bg-white hover:bg-brand-50 text-slate-600 hover:text-brand-600 rounded-md border border-slate-300 shadow-sm transition-all focus:outline-none" title="${window.appState.isRightPanelOpen ? 'ซ่อนแผงคำบรรยาย (Expand Interface)' : 'แสดงแผงคำบรรยาย (Show Details)'}">
+                                    <i class="fa-solid ${window.appState.isRightPanelOpen ? 'fa-angles-right' : 'fa-book-open'} text-xs"></i>
+                                    <span class="hidden sm:inline font-sans text-[10px] font-bold">${window.appState.isRightPanelOpen ? 'ซ่อนคำบรรยาย' : 'อ่านคำบรรยาย'}</span>
                                 </button>
-                                <span class="flex gap-1"><span class="w-2 h-2 rounded-full bg-slate-400"></span><span class="w-2 h-2 rounded-full bg-slate-400"></span></span>
+                                <span class="flex gap-1 ml-2"><span class="w-2 h-2 rounded-full bg-slate-400"></span><span class="w-2 h-2 rounded-full bg-slate-400"></span></span>
                             </div>
                         </div>
                         <div class="flex-1 p-2 md:p-4 overflow-y-auto custom-scrollbar flex items-center justify-center">
@@ -1055,8 +996,9 @@
                         </div>
                     </div>
 
+                    ${window.appState.isRightPanelOpen ? `
                     <!-- Right Panel: Automations & Workload Reduction -->
-                    <div class="w-full md:w-[55%] lg:w-[60%] bg-white/60 flex flex-col overflow-hidden">
+                    <div class="w-full md:w-[55%] lg:w-[60%] bg-white/60 flex flex-col overflow-hidden transition-all duration-300 border-l border-slate-200/50">
                         <div class="flex-1 overflow-y-auto p-6 custom-scrollbar space-y-6">
                             
                             <!-- Plug-in Detail -->
@@ -1084,6 +1026,7 @@
 
                         </div>
                     </div>
+                    ` : ''}
                 </div>
             `;
             
