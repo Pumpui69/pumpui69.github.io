@@ -102,14 +102,6 @@
             box-shadow: var(--tw-shadow-glass);
         }
 
-        .glass-dark {
-            background: linear-gradient(135deg, rgba(26, 29, 36, 0.95) 0%, rgba(33, 27, 28, 0.9) 100%);
-            backdrop-filter: blur(24px);
-            -webkit-backdrop-filter: blur(24px);
-            border: 1px solid rgba(164, 26, 40, 0.2); 
-            box-shadow: 0 15px 50px 0 rgba(0, 0, 0, 0.3);
-        }
-
         .hover-lift { transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease, border-color 0.4s ease; }
         .hover-lift:hover { 
             transform: translateY(-4px) scale(1.005); 
@@ -133,8 +125,6 @@
         .deep-bullet-list li::before { content: '\f0da'; font-family: 'Font Awesome 6 Free'; font-weight: 900; position: absolute; left: 0; top: 0.1rem; color: #BE9A60; }
         .deep-bullet-list strong { color: #1A1D24; }
 
-        .bg-grid-pattern { background-image: linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 24px 24px; }
-        
         /* Smooth Tab Transitions */
         .page-view { display: none; opacity: 0; transform: translateY(10px); transition: all 0.4s ease-out; }
         .page-view.active { display: block; opacity: 1; transform: translateY(0); }
@@ -160,7 +150,8 @@
     <div class="blob blob-2"></div>
     <div class="blob blob-3"></div>
 
-    <header class="sticky top-0 z-50 glass border-b border-white/60 pt-8 pb-4 transition-all shadow-soft">
+    <!-- แก้ไขจาก sticky top-0 เป็น relative เพื่อไม่ให้แบนเนอร์ค้าง ให้มีพื้นที่อ่านเนื้อหา -->
+    <header class="relative z-40 glass border-b border-white/60 pt-8 pb-4 transition-all shadow-soft">
         <div class="max-w-7xl mx-auto px-6 lg:px-8">
             <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 mb-2">
                 <div class="max-w-3xl">
@@ -188,17 +179,14 @@
                 </div>
             </div>
 
-            <!-- Page Tabs (3 Tabs now) -->
+            <!-- Page Tabs (ยุบเหลือ 2 แท็บ) -->
             <div class="mt-8 flex justify-start lg:justify-center overflow-x-auto custom-scrollbar pb-2">
                 <div class="inline-flex p-1.5 bg-slate-200/40 backdrop-blur-md rounded-full shadow-inner border border-slate-200/50 min-w-max">
                     <button onclick="window.switchPage('journey')" id="tab-journey" class="relative px-6 sm:px-8 py-2.5 text-xs sm:text-sm font-ui rounded-full transition-all duration-300 flex items-center justify-center gap-2.5 text-center">
                         <i class="fa-solid fa-route text-base"></i> 
                         <span>Service Blueprint</span>
                     </button>
-                    <button onclick="window.switchPage('deepdive')" id="tab-deepdive" class="relative px-6 sm:px-8 py-2.5 text-xs sm:text-sm font-ui rounded-full transition-all duration-300 flex items-center justify-center gap-2.5 text-center">
-                        <i class="fa-solid fa-microchip text-base"></i> 
-                        <span>System Architecture</span>
-                    </button>
+                    <!-- นำ System Architecture ออกตาม Requirement -->
                     <button onclick="window.switchPage('roi')" id="tab-roi" class="relative px-6 sm:px-8 py-2.5 text-xs sm:text-sm font-ui rounded-full transition-all duration-300 flex items-center justify-center gap-2.5 text-center">
                         <i class="fa-solid fa-chart-pie text-base"></i> 
                         <span>Operations ROI & Impact</span>
@@ -215,13 +203,13 @@
         <main class="py-12">
             <div class="max-w-7xl mx-auto px-6 lg:px-8">
                 
-                <!-- COMPACT, NO-SCROLL INFOGRAPHIC OVERVIEW WITH HOVER -->
-                <div id="workflow-infographic"></div>
+                <!-- COMPACT INFOGRAPHIC OVERVIEW WITH HOVER -->
+                <div id="workflow-infographic" class="relative z-30"></div>
 
-                <!-- Main Blueprint Content -->
-                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start relative">
+                <!-- Main Blueprint Content (ลด z-index ให้ต่ำกว่า Infographic) -->
+                <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-start relative z-10">
                     <!-- Left Sidebar Nav -->
-                    <div class="hidden lg:block lg:col-span-3 sticky top-52">
+                    <div class="hidden lg:block lg:col-span-3 sticky top-10">
                         <div class="glass rounded-3xl p-6 shadow-soft">
                             <h3 class="font-ui font-bold text-slate-800 text-xs uppercase tracking-widest mb-6 flex items-center border-b border-slate-200/60 pb-4"><i class="fa-solid fa-map-location-dot text-brand-600 mr-3 text-lg"></i> ขั้นตอนการทำงาน (Phases)</h3>
                             <div id="timeline-nav" class="space-y-1.5"></div>
@@ -235,28 +223,7 @@
     </div>
 
     <!-- ========================================== -->
-    <!-- PAGE 2: ENTERPRISE ARCHITECTURE DETAILS -->
-    <!-- ========================================== -->
-    <div id="page-deepdive" class="page-view min-h-screen pb-20">
-        <div class="glass-dark py-20 bg-grid-pattern relative overflow-hidden border-b border-brand-900/50 shadow-lg">
-            <div class="absolute inset-0 bg-gradient-to-l from-[#171A21]/95 to-[#1A1516]/95 z-0"></div>
-            <div class="absolute bottom-0 right-10 w-96 h-96 bg-revored-500/10 blur-[120px] rounded-full z-0"></div>
-            
-            <div class="max-w-7xl mx-auto px-6 lg:px-8 text-center relative z-10">
-                <span class="inline-block py-1 px-3 rounded-full bg-white/10 border border-white/20 text-brand-300 text-[10px] font-bold tracking-widest uppercase mb-4 backdrop-blur-md">Deep Dive Analysis</span>
-                <h2 class="text-4xl sm:text-5xl font-ui font-extrabold text-white mb-6 drop-shadow-xl tracking-tight">เจาะลึกโครงสร้างระบบองค์กร</h2>
-                <p class="text-lg text-slate-300 font-light max-w-3xl mx-auto bg-black/40 p-5 rounded-2xl backdrop-blur-xl border border-white/5 shadow-inner leading-relaxed">
-                    อธิบายโครงสร้างระบบเทคโนโลยีที่อยู่เบื้องหลังกระบวนการทั้งหมด เผยให้เห็นการเชื่อมโยงข้อมูล (Data Integration) และการใช้เทคโนโลยีมาตรฐานตลาดเพื่ออุดช่องโหว่ทางธุรกิจในแต่ละฝ่าย
-                </p>
-            </div>
-        </div>
-        <div class="max-w-7xl mx-auto px-6 lg:px-8 mt-16 space-y-12" id="deepdive-content">
-            <!-- Rendered via JS -->
-        </div>
-    </div>
-
-    <!-- ========================================== -->
-    <!-- PAGE 3: OPERATIONS ROI & TRANSFORMATION -->
+    <!-- PAGE 2: OPERATIONS ROI & TRANSFORMATION -->
     <!-- ========================================== -->
     <div id="page-roi" class="page-view min-h-screen pb-20">
         <main class="py-12 max-w-7xl mx-auto px-6 lg:px-8" id="roi-content">
@@ -268,10 +235,8 @@
     <!-- MODAL 1: 6 PILLARS EXPERT ANALYSIS (Risk/Overlap/etc) -->
     <!-- ========================================== -->
     <div id="analysisModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 opacity-0 pointer-events-none transition-opacity duration-300">
-        <!-- Backdrop -->
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="window.closeModal('analysisModal')"></div>
         
-        <!-- Modal Content -->
         <div class="modal-content relative bg-white rounded-3xl shadow-modal w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden transform scale-95 transition-transform duration-300 border border-white/60">
             <div class="px-8 py-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
                 <div class="flex items-center gap-5">
@@ -300,10 +265,8 @@
     <!-- MODAL 2: OPERATIONS PHASE DETAIL (Deep Dive per Phase) -->
     <!-- ========================================== -->
     <div id="phaseDetailModal" class="fixed inset-0 z-[100] flex items-center justify-center p-4 sm:p-6 opacity-0 pointer-events-none transition-opacity duration-300">
-        <!-- Backdrop -->
         <div class="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onclick="window.closeModal('phaseDetailModal')"></div>
         
-        <!-- Modal Content -->
         <div class="modal-content relative bg-white rounded-3xl shadow-modal w-full max-w-4xl max-h-[90vh] flex flex-col overflow-hidden transform scale-95 transition-transform duration-300 border border-white/60">
             <div id="phaseDetailContent" class="flex flex-col h-full overflow-hidden"></div>
         </div>
@@ -612,7 +575,7 @@
 
         // 3. CORE FUNCTIONS (Smooth Tab Transition)
         window.switchPage = function(pageId) {
-            const pages = ['journey', 'deepdive', 'roi']; // Added ROI
+            const pages = ['journey', 'roi']; // เอา Deepdive ออกตามคำขอ
             
             pages.forEach(id => {
                 const tab = document.getElementById('tab-' + id);
@@ -640,7 +603,7 @@
             window.appState.activePage = pageId;
         };
 
-        // RENDER: Top Workflow Infographic (No Scroll, With Hover Tooltip)
+        // RENDER: Top Workflow Infographic (No Scroll, With Hover Tooltip fixed z-index)
         function renderWorkflowInfographic() {
             const container = document.getElementById('workflow-infographic');
             if (!container) return;
@@ -654,9 +617,21 @@
                 const enTitle = match ? match[2].trim() : "Phase " + stage.id;
                 const isLast = index === journeyData.length - 1;
 
+                // จัดการเรื่องตำแหน่ง Tooltip ไม่ให้ล้นจอ
+                let tooltipPosClass = "left-1/2 -translate-x-1/2";
+                let arrowPosClass = "left-1/2 -translate-x-1/2";
+                
+                if (index === 0) {
+                    tooltipPosClass = "left-0 translate-x-0";
+                    arrowPosClass = "left-8";
+                } else if (index === journeyData.length - 1) {
+                    tooltipPosClass = "right-0 translate-x-0";
+                    arrowPosClass = "right-8";
+                }
+
                 itemsHTML += `
-                    <!-- Added hover:z-50 so the tooltip stays on top of everything -->
-                    <div class="flex flex-col items-center group cursor-pointer relative z-10 hover:z-50 w-full" onclick="document.querySelector('#stage-${stage.id}').scrollIntoView({behavior: 'smooth', block: 'start'})">
+                    <!-- จัดการ z-index เพื่อให้ Tooltip ลอยอยู่ด้านบนสุด -->
+                    <div class="flex flex-col items-center group cursor-pointer relative z-20 hover:z-[100] w-full" onclick="document.querySelector('#stage-${stage.id}').scrollIntoView({behavior: 'smooth', block: 'start'})">
                         
                         <!-- Icon Box -->
                         <div class="w-16 h-16 md:w-20 md:h-20 rounded-2xl bg-white border border-brand-200 shadow-[0_4px_20px_-5px_rgba(189,154,96,0.15)] flex flex-col items-center justify-center text-brand-500 mb-4 group-hover:-translate-y-2 group-hover:border-brand-400 group-hover:shadow-[0_10px_30px_-5px_rgba(189,154,96,0.3)] group-hover:text-brand-600 transition-all duration-300 relative bg-gradient-to-b from-white to-brand-50/40">
@@ -667,9 +642,9 @@
                         <p class="text-[9px] md:text-[10px] text-slate-500 font-medium text-center leading-tight px-1 hidden md:block">${thTitle}</p>
                         
                         <!-- Tooltip Hover Pop-up -->
-                        <div class="tooltip-card absolute top-full left-1/2 -translate-x-1/2 mt-4 w-56 sm:w-64 bg-white/95 backdrop-blur-xl p-5 rounded-2xl shadow-xl border border-brand-100 pointer-events-none z-[60]">
+                        <div class="tooltip-card absolute top-full ${tooltipPosClass} mt-4 w-56 sm:w-64 bg-white/95 backdrop-blur-xl p-5 rounded-2xl shadow-xl border border-brand-100 pointer-events-none z-[100]">
                             <!-- Triangle Arrow -->
-                            <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-t border-l border-brand-100 rotate-45"></div>
+                            <div class="absolute -top-2 ${arrowPosClass} w-4 h-4 bg-white border-t border-l border-brand-100 rotate-45"></div>
                             <div class="relative z-10 text-left">
                                 <h5 class="text-brand-700 font-bold text-[10px] uppercase tracking-widest mb-1 flex items-center"><i class="fa-solid fa-bullseye mr-1.5"></i> เป้าหมายของเฟสนี้</h5>
                                 <p class="text-xs text-slate-700 font-medium mb-3 leading-relaxed">${stage.subtitle}</p>
@@ -691,9 +666,7 @@
             });
 
             container.innerHTML = `
-                <!-- Added overflow-visible so tooltip can escape bounds -->
-                <div class="glass p-6 md:p-10 rounded-[2rem] border border-white/80 shadow-soft relative overflow-visible mb-12 bg-gradient-to-br from-white/60 to-brand-50/30">
-                    <!-- Background Decors -->
+                <div class="glass p-6 md:p-10 rounded-[2rem] border border-white/80 shadow-soft relative overflow-visible mb-12 bg-gradient-to-br from-white/60 to-brand-50/30 z-30">
                     <div class="absolute -right-20 -top-20 w-64 h-64 bg-brand-200/20 rounded-full blur-3xl z-0 pointer-events-none"></div>
                     <div class="absolute -left-20 -bottom-20 w-64 h-64 bg-revored-200/20 rounded-full blur-3xl z-0 pointer-events-none"></div>
                     
@@ -707,7 +680,7 @@
                     </div>
 
                     <!-- NO SCROLL COMPACT LAYOUT -->
-                    <div class="relative w-full">
+                    <div class="relative w-full z-20">
                         <div class="absolute top-[32px] md:top-[40px] left-10 right-10 h-1.5 bg-gradient-to-r from-brand-100 via-revored-200 to-brand-100 rounded-full z-0 hidden lg:block"></div>
                         <div class="flex flex-wrap justify-center lg:flex-nowrap lg:justify-between items-start gap-y-10 lg:gap-0 w-full relative z-10">
                             ${itemsHTML}
@@ -721,7 +694,6 @@
         function renderJourney() {
             const navContainer = document.getElementById('timeline-nav');
             const contentContainer = document.getElementById('timeline-content');
-            const deepdiveContainer = document.getElementById('deepdive-content'); // For Tab 2 sync
             
             navContainer.innerHTML = journeyData.map((stage, index) => `
                 <a href="#stage-${stage.id}" class="nav-link flex items-center p-3 rounded-2xl transition-all duration-300 border border-transparent ${index === 0 ? 'bg-revored-50 border-revored-100 text-revored-700 shadow-sm transform scale-[1.02]' : 'text-slate-500 hover:bg-slate-50 hover:border-slate-200/50'}" data-target="${stage.id}">
@@ -733,8 +705,6 @@
                     </div>
                 </a>
             `).join('');
-
-            let deepdiveHTML = '';
 
             contentContainer.innerHTML = journeyData.map(stage => {
                 const emotionCfg = uiIcons.emotion[stage.emotionType] || uiIcons.emotion["คาดหวัง"];
@@ -774,39 +744,6 @@
                 const frontItems = stage.front.map(item => `<li class="flex items-start mb-2"><i class="fa-solid fa-circle text-[6px] mt-2 mr-2 text-sky-500 opacity-60 shrink-0"></i><span class="text-[11px] text-slate-700 leading-tight">${item}</span></li>`).join('');
                 const backItems = stage.back.map(item => `<li class="flex items-start mb-2"><i class="fa-solid fa-circle text-[6px] mt-2 mr-2 text-amber-500 opacity-60 shrink-0"></i><span class="text-[11px] text-slate-700 leading-tight">${item}</span></li>`).join('');
                 const techItems = stage.tech.map(item => `<div class="bg-white/80 border border-emerald-100 rounded-lg p-2.5 shadow-sm text-xs font-semibold text-emerald-800 mb-2 flex items-center"><div class="w-1.5 h-4 bg-emerald-400 rounded-full mr-2 shrink-0"></div><span class="truncate">${item}</span></div>`).join('');
-
-                // Build Tab 2 content in same loop
-                deepdiveHTML += `
-                    <div class="glass rounded-3xl shadow-soft border border-white/80 overflow-hidden hover-lift group">
-                        <div class="border-b border-slate-200/50 bg-white/50 px-8 py-6 flex flex-col md:flex-row md:items-center justify-between gap-4 backdrop-blur-xl transition-colors group-hover:bg-white/70">
-                            <div class="flex items-center gap-6">
-                                <div class="w-16 h-16 rounded-2xl bg-brand-50 text-brand-600 flex items-center justify-center text-2xl shadow-sm border border-brand-200"><i class="fa-solid fa-layer-group"></i></div>
-                                <div>
-                                    <h3 class="text-2xl font-ui font-bold text-slate-900 drop-shadow-sm tracking-tight mb-1">ส่วนที่ ${stage.id}: ${stage.title}</h3>
-                                    <p class="text-sm text-slate-500 font-medium tracking-wide">${stage.subtitle}</p>
-                                </div>
-                            </div>
-                            <button onclick="window.openPhaseDetail(${stage.id})" class="px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-full transition-colors shadow-md flex items-center justify-center gap-2">
-                                <i class="fa-solid fa-search-plus"></i> ดูรายละเอียดเชิงปฏิบัติการ
-                            </button>
-                        </div>
-                        <div class="p-8 md:p-10 bg-white/30 backdrop-blur-sm">
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-                                <div>
-                                    <h4 class="font-bold text-slate-800 mb-5 flex items-center text-lg"><i class="fa-solid fa-microchip text-brand-500 mr-3"></i> องค์ประกอบของระบบเทคโนโลยี (Tech Stack)</h4>
-                                    <div class="flex flex-col gap-2 mb-6">${techItems}</div>
-                                    <h5 class="text-xs font-bold text-slate-500 uppercase tracking-widest mb-3">กระบวนการหลังบ้าน (Backstage)</h5>
-                                    <ul class="deep-bullet-list space-y-2">${backItems}</ul>
-                                </div>
-                                <div class="bg-gradient-to-br from-brand-50/80 to-white/80 backdrop-blur-md p-8 rounded-3xl border border-brand-100 shadow-sm relative overflow-hidden flex flex-col justify-center">
-                                    <div class="absolute -right-6 -bottom-6 opacity-5"><i class="fa-solid fa-shield-halved text-9xl text-brand-500"></i></div>
-                                    <h4 class="font-bold text-brand-900 mb-5 flex items-center relative z-10 text-lg"><i class="fa-solid fa-bullseye text-brand-500 mr-3"></i> ผลลัพธ์จากการเปลี่ยนผ่าน (Transformation)</h4>
-                                    <p class="text-slate-700 leading-relaxed relative z-10 font-medium">${stage.outcome}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                `;
 
                 return `
                     <div id="stage-${stage.id}" class="stage-card scroll-mt-32 glass rounded-3xl overflow-hidden flex flex-col mb-12 border border-white/80 shadow-soft">
@@ -903,12 +840,10 @@
                 `;
             }).join('');
 
-            deepdiveContainer.innerHTML = deepdiveHTML;
             setupScrollSpy();
         }
 
-        // RENDER: Tab 3 (Operations ROI Pitching Dashboard)
-        // มีการอธิบาย Basis of calculation ที่ชัดเจน และเปลี่ยน Timeline เป็นรูปแบบ Gantt/Step ที่ดูเป็นโปรเจกต์
+        // RENDER: Tab 2 (Operations ROI Pitching Dashboard - จัดเรียง 4 คอลัมน์และซ่อนคำอธิบายใน Hover)
         function renderROI() {
             const container = document.getElementById('roi-content');
             if(!container) return;
@@ -922,92 +857,94 @@
                     </p>
                 </div>
 
-                <!-- KPI Impact Grid (ปรับเป็น 2 คอลัมน์เพื่อให้มีพื้นที่อธิบายที่มาของตัวเลขอย่างละเอียด) -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
+                <!-- KPI Impact Grid (4 คอลัมน์แถวเดียว พร้อม Tooltip ฐานการคำนวณ) -->
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
                     
                     <!-- KPI 1: Lead Time -->
-                    <div class="glass p-8 rounded-3xl border border-white/80 shadow-soft relative overflow-hidden bg-white/50 flex flex-col h-full">
-                        <div class="absolute -right-6 -top-6 opacity-5"><i class="fa-solid fa-stopwatch text-9xl text-sky-500"></i></div>
-                        <div class="flex justify-between items-start mb-4 relative z-10">
-                            <div class="w-14 h-14 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center text-2xl shadow-sm border border-sky-100"><i class="fa-solid fa-stopwatch"></i></div>
-                            <h4 class="text-5xl font-ui font-extrabold text-slate-800">80<span class="text-2xl text-slate-500">%</span></h4>
-                        </div>
-                        <p class="text-sm font-bold text-sky-600 uppercase tracking-widest mb-4 relative z-10">ลดระยะเวลาทำงาน (Lead Time)</p>
+                    <div class="glass p-6 rounded-3xl border border-white/80 shadow-soft relative overflow-visible bg-white/50 flex flex-col items-center text-center group cursor-pointer hover:bg-white/80 transition-all hover:-translate-y-1">
+                        <!-- ไอคอน Info แจ้งให้รู้ว่าเอาเมาส์ชี้ได้ -->
+                        <div class="absolute top-4 right-4 text-sky-300 group-hover:text-sky-500 transition-colors"><i class="fa-solid fa-circle-info"></i></div>
                         
-                        <div class="mt-auto pt-5 border-t border-slate-200/60 relative z-10">
-                            <div class="bg-white/80 p-5 rounded-2xl border border-slate-100 shadow-sm">
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-calculator mr-1"></i> ฐานการคำนวณ (Basis of Calculation)</p>
+                        <div class="w-14 h-14 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center text-2xl shadow-sm border border-sky-100 mb-4"><i class="fa-solid fa-stopwatch"></i></div>
+                        <h4 class="text-4xl font-ui font-extrabold text-slate-800 mb-2">80<span class="text-xl text-slate-500">%</span></h4>
+                        <p class="text-[11px] font-bold text-sky-600 uppercase tracking-widest leading-tight">ลดระยะเวลาทำงาน<br/><span class="text-[9px] text-slate-500">(Lead Time)</span></p>
+                        
+                        <!-- Hover Tooltip (ฐานการคำนวณ) -->
+                        <div class="tooltip-card absolute top-full left-1/2 -translate-x-1/2 mt-4 w-64 md:w-72 bg-white/95 backdrop-blur-xl p-5 rounded-2xl shadow-xl border border-sky-100 pointer-events-none z-[60]">
+                            <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-t border-l border-sky-100 rotate-45"></div>
+                            <div class="relative z-10 text-left">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-calculator mr-1"></i> ฐานการคำนวณ (Basis)</p>
                                 <p class="text-xs text-slate-600 font-light leading-relaxed mb-2">
                                     <strong class="font-medium text-slate-800">สูตร:</strong> (เวลาเดิม - เวลาใหม่) / เวลาเดิม x 100
                                 </p>
                                 <p class="text-xs text-slate-600 font-light leading-relaxed">
-                                    <strong class="font-medium text-slate-800">ที่มาของตัวเลข:</strong> วัดจาก "เวลาเฉลี่ยตั้งแต่รับโจทย์ลูกค้าจนถึงส่งใบเสนอราคา" เดิมเซลส์ต้องใช้เวลาประสานงานฝ่ายจัดซื้อและบัญชีเฉลี่ย 2-3 วัน (ประมาณ 48 ชั่วโมง) เมื่อใช้ระบบ <span class="text-brand-600 font-medium">CRM และ CPQ</span> ที่ดึงต้นทุนแบบเรียลไทม์ ทำให้ลดเวลาเหลือเพียง 1-2 ชั่วโมง (ประหยัดเวลาไปกว่า 80%)
+                                    <strong class="font-medium text-slate-800">ที่มา:</strong> วัดจาก "เวลาตั้งแต่รับโจทย์ลูกค้าจนถึงส่งใบเสนอราคา" เดิมประสานงานเฉลี่ย 2-3 วัน เมื่อใช้ระบบ <span class="text-sky-600 font-medium">CRM และ CPQ</span> ดึงต้นทุนเรียลไทม์ ทำให้ลดเวลาเหลือเพียง 1-2 ชั่วโมง
                                 </p>
                             </div>
                         </div>
                     </div>
 
                     <!-- KPI 2: R&D Waste -->
-                    <div class="glass p-8 rounded-3xl border border-white/80 shadow-soft relative overflow-hidden bg-white/50 flex flex-col h-full">
-                        <div class="absolute -right-6 -top-6 opacity-5"><i class="fa-solid fa-microscope text-9xl text-indigo-500"></i></div>
-                        <div class="flex justify-between items-start mb-4 relative z-10">
-                            <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl shadow-sm border border-indigo-100"><i class="fa-solid fa-microscope"></i></div>
-                            <h4 class="text-5xl font-ui font-extrabold text-slate-800">75<span class="text-2xl text-slate-500">%</span></h4>
-                        </div>
-                        <p class="text-sm font-bold text-indigo-600 uppercase tracking-widest mb-4 relative z-10">ลดของเสียในห้องแล็บ (R&D Waste)</p>
+                    <div class="glass p-6 rounded-3xl border border-white/80 shadow-soft relative overflow-visible bg-white/50 flex flex-col items-center text-center group cursor-pointer hover:bg-white/80 transition-all hover:-translate-y-1">
+                        <div class="absolute top-4 right-4 text-indigo-300 group-hover:text-indigo-500 transition-colors"><i class="fa-solid fa-circle-info"></i></div>
+
+                        <div class="w-14 h-14 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-2xl shadow-sm border border-indigo-100 mb-4"><i class="fa-solid fa-microscope"></i></div>
+                        <h4 class="text-4xl font-ui font-extrabold text-slate-800 mb-2">75<span class="text-xl text-slate-500">%</span></h4>
+                        <p class="text-[11px] font-bold text-indigo-600 uppercase tracking-widest leading-tight">ลดของเสียในห้องแล็บ<br/><span class="text-[9px] text-slate-500">(R&D Waste)</span></p>
                         
-                        <div class="mt-auto pt-5 border-t border-slate-200/60 relative z-10">
-                            <div class="bg-white/80 p-5 rounded-2xl border border-slate-100 shadow-sm">
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-calculator mr-1"></i> ฐานการคำนวณ (Basis of Calculation)</p>
+                        <div class="tooltip-card absolute top-full left-1/2 -translate-x-1/2 mt-4 w-64 md:w-72 bg-white/95 backdrop-blur-xl p-5 rounded-2xl shadow-xl border border-indigo-100 pointer-events-none z-[60]">
+                            <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-t border-l border-indigo-100 rotate-45"></div>
+                            <div class="relative z-10 text-left">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-calculator mr-1"></i> ฐานการคำนวณ (Basis)</p>
                                 <p class="text-xs text-slate-600 font-light leading-relaxed mb-2">
-                                    <strong class="font-medium text-slate-800">สูตร:</strong> ต้นทุนสารสกัดที่ต้องทิ้งต่อ 1 โปรเจกต์ (Scrap Cost per Project)
+                                    <strong class="font-medium text-slate-800">สูตร:</strong> ต้นทุนสารสกัดที่ต้องเททิ้งต่อ 1 โปรเจกต์
                                 </p>
                                 <p class="text-xs text-slate-600 font-light leading-relaxed">
-                                    <strong class="font-medium text-slate-800">ที่มาของตัวเลข:</strong> เดิมการพัฒนาสูตรใหม่ต้องผสมสารจริงแบบลองผิดลองถูก (Trial & Error) เฉลี่ย 4-5 ครั้งต่อสูตร การนำ <span class="text-brand-600 font-medium">AI In-silico Simulation</span> มาจำลองความเข้ากันได้ทางเคมีล่วงหน้า ช่วยลดรอบการทำแล็บจริงเหลือเพียง 1-2 ครั้ง ประหยัดค่าสารสกัดตั้งต้น (Active Ingredients) ราคาแพงได้ถึง 75%
+                                    <strong class="font-medium text-slate-800">ที่มา:</strong> เปลี่ยนจากการลองผสมผิดถูก 4-5 ครั้ง มาใช้ <span class="text-indigo-600 font-medium">AI In-silico Simulation</span> จำลองความเข้ากันได้ทางเคมีล่วงหน้า ช่วยลดการทิ้งสารสกัดพรีเมียมได้ถึง 75%
                                 </p>
                             </div>
                         </div>
                     </div>
 
                     <!-- KPI 3: OEE -->
-                    <div class="glass p-8 rounded-3xl border border-white/80 shadow-soft relative overflow-hidden bg-white/50 flex flex-col h-full">
-                        <div class="absolute -right-6 -top-6 opacity-5"><i class="fa-solid fa-gears text-9xl text-amber-500"></i></div>
-                        <div class="flex justify-between items-start mb-4 relative z-10">
-                            <div class="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl shadow-sm border border-amber-100"><i class="fa-solid fa-gears"></i></div>
-                            <h4 class="text-5xl font-ui font-extrabold text-slate-800">+25<span class="text-2xl text-slate-500">%</span></h4>
-                        </div>
-                        <p class="text-sm font-bold text-amber-600 uppercase tracking-widest mb-4 relative z-10">เพิ่มประสิทธิภาพเครื่องจักร (OEE)</p>
+                    <div class="glass p-6 rounded-3xl border border-white/80 shadow-soft relative overflow-visible bg-white/50 flex flex-col items-center text-center group cursor-pointer hover:bg-white/80 transition-all hover:-translate-y-1">
+                        <div class="absolute top-4 right-4 text-amber-300 group-hover:text-amber-500 transition-colors"><i class="fa-solid fa-circle-info"></i></div>
+
+                        <div class="w-14 h-14 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-2xl shadow-sm border border-amber-100 mb-4"><i class="fa-solid fa-gears"></i></div>
+                        <h4 class="text-4xl font-ui font-extrabold text-slate-800 mb-2">+25<span class="text-xl text-slate-500">%</span></h4>
+                        <p class="text-[11px] font-bold text-amber-600 uppercase tracking-widest leading-tight">เพิ่มประสิทธิภาพเครื่องจักร<br/><span class="text-[9px] text-slate-500">(OEE)</span></p>
                         
-                        <div class="mt-auto pt-5 border-t border-slate-200/60 relative z-10">
-                            <div class="bg-white/80 p-5 rounded-2xl border border-slate-100 shadow-sm">
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-calculator mr-1"></i> ฐานการคำนวณ (Basis of Calculation)</p>
+                        <div class="tooltip-card absolute top-full left-1/2 -translate-x-1/2 mt-4 w-64 md:w-72 bg-white/95 backdrop-blur-xl p-5 rounded-2xl shadow-xl border border-amber-100 pointer-events-none z-[60]">
+                            <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-t border-l border-amber-100 rotate-45"></div>
+                            <div class="relative z-10 text-left">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-calculator mr-1"></i> ฐานการคำนวณ (Basis)</p>
                                 <p class="text-xs text-slate-600 font-light leading-relaxed mb-2">
-                                    <strong class="font-medium text-slate-800">สูตร:</strong> Availability × Performance × Quality (อ้างอิงมาตรฐาน OEE สากล)
+                                    <strong class="font-medium text-slate-800">สูตร:</strong> Availability × Performance × Quality
                                 </p>
                                 <p class="text-xs text-slate-600 font-light leading-relaxed">
-                                    <strong class="font-medium text-slate-800">ที่มาของตัวเลข:</strong> การดึงข้อมูล <span class="text-brand-600 font-medium">IoT Sensor</span> มาวิเคราะห์ ช่วยลดเวลาเครื่องเสียฉุกเฉิน (Unplanned Downtime) ได้ 15% และการใช้ระบบ <span class="text-brand-600 font-medium">MES</span> สลับคิวผลิตอัจฉริยะ (Smart Scheduling) ช่วยลดเวลาหยุดล้างตั้งค่าเครื่อง (Changeover Time) ได้ 10% รวมเป็นประสิทธิภาพเครื่องจักรที่เพิ่มขึ้น 25%
+                                    <strong class="font-medium text-slate-800">ที่มา:</strong> <span class="text-amber-600 font-medium">IoT Sensor</span> ลดเวลาเครื่องเสียฉุกเฉิน 15% และ <span class="text-amber-600 font-medium">MES</span> สลับคิวอัจฉริยะลดเวลาตั้งค่าเครื่อง 10% ดันประสิทธิภาพโดยรวมเพิ่ม 25%
                                 </p>
                             </div>
                         </div>
                     </div>
 
                     <!-- KPI 4: Zero Defect -->
-                    <div class="glass p-8 rounded-3xl border border-white/80 shadow-soft relative overflow-hidden bg-white/50 flex flex-col h-full">
-                        <div class="absolute -right-6 -top-6 opacity-5"><i class="fa-solid fa-shield-check text-9xl text-emerald-500"></i></div>
-                        <div class="flex justify-between items-start mb-4 relative z-10">
-                            <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl shadow-sm border border-emerald-100"><i class="fa-solid fa-shield-check"></i></div>
-                            <h4 class="text-5xl font-ui font-extrabold text-slate-800">0<span class="text-2xl text-slate-500">%</span></h4>
-                        </div>
-                        <p class="text-sm font-bold text-emerald-600 uppercase tracking-widest mb-4 relative z-10">เป้าหมายของเสียเป็นศูนย์ (Zero Defect)</p>
+                    <div class="glass p-6 rounded-3xl border border-white/80 shadow-soft relative overflow-visible bg-white/50 flex flex-col items-center text-center group cursor-pointer hover:bg-white/80 transition-all hover:-translate-y-1">
+                        <div class="absolute top-4 right-4 text-emerald-300 group-hover:text-emerald-500 transition-colors"><i class="fa-solid fa-circle-info"></i></div>
+
+                        <div class="w-14 h-14 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-2xl shadow-sm border border-emerald-100 mb-4"><i class="fa-solid fa-shield-check"></i></div>
+                        <h4 class="text-4xl font-ui font-extrabold text-slate-800 mb-2">0<span class="text-xl text-slate-500">%</span></h4>
+                        <p class="text-[11px] font-bold text-emerald-600 uppercase tracking-widest leading-tight">เป้าหมายของเสียเป็นศูนย์<br/><span class="text-[9px] text-slate-500">(Zero Defect)</span></p>
                         
-                        <div class="mt-auto pt-5 border-t border-slate-200/60 relative z-10">
-                            <div class="bg-white/80 p-5 rounded-2xl border border-slate-100 shadow-sm">
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-calculator mr-1"></i> ฐานการคำนวณ (Basis of Calculation)</p>
+                        <div class="tooltip-card absolute top-full left-1/2 -translate-x-1/2 mt-4 w-64 md:w-72 bg-white/95 backdrop-blur-xl p-5 rounded-2xl shadow-xl border border-emerald-100 pointer-events-none z-[60]">
+                            <div class="absolute -top-2 left-1/2 -translate-x-1/2 w-4 h-4 bg-white border-t border-l border-emerald-100 rotate-45"></div>
+                            <div class="relative z-10 text-left">
+                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider mb-2"><i class="fa-solid fa-calculator mr-1"></i> ฐานการคำนวณ (Basis)</p>
                                 <p class="text-xs text-slate-600 font-light leading-relaxed mb-2">
-                                    <strong class="font-medium text-slate-800">ตัวชี้วัด:</strong> Defect Escape Rate (อัตราสินค้ามีตำหนิที่หลุดรอดไปถึงลูกค้า)
+                                    <strong class="font-medium text-slate-800">ตัวชี้วัด:</strong> Defect Escape Rate (สินค้าตำหนิที่หลุดรอด)
                                 </p>
                                 <p class="text-xs text-slate-600 font-light leading-relaxed">
-                                    <strong class="font-medium text-slate-800">ที่มาของตัวเลข:</strong> เปลี่ยนจากการให้พนักงาน "สุ่มตรวจด้วยสายตา" (Human Random Sampling) ซึ่งมีโอกาสหลุดรอดสูง ไปสู่การใช้ <span class="text-brand-600 font-medium">Machine Vision AI</span> ตรวจสอบสินค้าแบบ 100% In-line ตลอดสายพาน ทั้งระดับน้ำ รอยรั่ว และฉลาก จึงการันตีได้ว่าสินค้าที่ผ่านเครื่องนี้จะไร้ตำหนิ 100%
+                                    <strong class="font-medium text-slate-800">ที่มา:</strong> ยกเลิกการให้พนักงานสุ่มตรวจด้วยสายตา เปลี่ยนมาใช้ <span class="text-emerald-600 font-medium">Machine Vision AI</span> สแกนตรวจสอบ 100% In-line ตลอดสายพาน รับประกันไร้ตำหนิแน่นอน
                                 </p>
                             </div>
                         </div>
@@ -1151,7 +1088,7 @@
             });
         }
 
-        // MODALS
+        // MODALS (แก้ไขให้แสดงและปิดได้ชัวร์ 100%)
         window.openAnalysisModal = function(stageId, pillarKey) {
             const stage = journeyData.find(s => s.id === stageId);
             if (!stage) return;
