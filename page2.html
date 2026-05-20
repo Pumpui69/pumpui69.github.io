@@ -536,40 +536,140 @@
                 reduceWork: "เจ้าของแบรนด์ไม่ต้องลงทุนสร้างโกดังติดแอร์ ไม่ต้องปวดหัวกับการจ้างพนักงานแพ็คของ และลดความเสี่ยงสินค้าเสื่อมสภาพจากการจัดเก็บผิดวิธี สามารถนำเวลาไปโฟกัสที่การทำการตลาดและไลฟ์ขายของได้อย่างเต็มที่"
             },
             7: {
-                role: "Key Account Manager", theme: themes.purple, icon: "fa-chart-pie", 
-                shortTitle: "7. Loyalty (Predictive)", title: "RFM Marketing & Predictive Demand", 
-                trigger: "ลูกค้าขายสินค้าไปได้ระยะหนึ่ง ข้อมูลยอดขายเริ่มเข้าสู่ระบบ",
+                role: "Key Account Manager & Strategist", theme: themes.purple, icon: "fa-chart-pie", 
+                shortTitle: "7. Proactive Growth", title: "CRM Dashboard & Premium Support", 
+                trigger: "ลูกค้าขายสินค้าไปได้ 2 เดือน ระบบแจ้งเตือนว่าสต็อกใกล้หมดและถึงเวลาขยายตลาด",
                 uiConcept: `
-                    <div class="h-full flex flex-col p-4 bg-slate-100">
-                        <!-- RFM Score Dashboard -->
-                        <div class="bg-white rounded-xl shadow-sm p-3 mb-3 border border-slate-200">
-                            <div class="text-[10px] font-bold text-slate-800 uppercase tracking-widest mb-2 border-b pb-1">Customer RFM Analysis</div>
-                            <div class="flex justify-between items-center mt-2">
-                                <div class="text-center w-1/3 border-r">
-                                    <div class="text-lg font-bold text-slate-700">R<span class="text-[10px] text-slate-400 font-normal ml-1">12d</span></div>
-                                </div>
-                                <div class="text-center w-1/3 border-r">
-                                    <div class="text-lg font-bold text-slate-700">F<span class="text-[10px] text-slate-400 font-normal ml-1">3x</span></div>
-                                </div>
-                                <div class="text-center w-1/3">
-                                    <div class="text-lg font-bold text-purple-600">M<span class="text-[10px] font-normal ml-1 text-purple-400">High</span></div>
-                                </div>
-                            </div>
-                            <div class="mt-2 text-[10px] text-center bg-purple-100 text-purple-800 py-1 rounded font-bold">Segment: "Champion" (VIP)</div>
+                    <div class="h-full flex flex-col bg-slate-50 relative overflow-hidden w-full">
+                        
+                        <!-- Floating Notification -->
+                        <div class="absolute top-2 left-2 right-2 bg-rose-500 text-white text-[10px] p-2 rounded-lg shadow-lg flex items-center justify-between z-20 animate-pulse-fast border border-rose-400">
+                            <div class="flex items-center gap-2"><i class="fa-solid fa-bell"></i> <strong>Alert: 1 Account requires immediate action</strong></div>
+                            <span class="text-[9px] bg-white/20 px-1.5 py-0.5 rounded font-bold cursor-pointer">View</span>
                         </div>
 
-                        <div class="bg-purple-900 p-3 rounded-xl text-[11px] mb-4 flex-1 border border-purple-700 text-purple-200 shadow-inner flex flex-col justify-center">
-                            <strong class="text-purple-300 mb-1"><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> AI Next Best Action:</strong><br>
-                            Predictive model shows Khun Aura's serum stock will deplete in 14 days.<br><br>
-                            <strong>Suggestion:</strong> Propose Re-order + Upsell new "Sunscreen" formula mapped in initial chat.
+                        <!-- ================= LIST VIEW (DASHBOARD) ================= -->
+                        <div id="s7-list" class="pt-11 p-3 flex-1 overflow-y-auto custom-scrollbar flex flex-col w-full transition-all duration-300">
+                            <div class="text-[11px] font-bold text-slate-800 border-b border-slate-200 pb-2 mb-2 flex justify-between">
+                                <span><i class="fa-solid fa-users text-purple-500 mr-1"></i> My Accounts (Portfolio)</span>
+                                <span class="text-slate-500">3 Active Brands</span>
+                            </div>
+
+                            <!-- Client 1: Aura (Critical) -->
+                            <div onclick="document.getElementById('s7-list').classList.add('hidden'); document.getElementById('s7-detail').classList.remove('hidden');" class="bg-white p-2.5 rounded-xl shadow-sm border border-rose-300 mb-2 cursor-pointer hover:shadow-md hover:border-purple-400 transition-all relative overflow-hidden group">
+                                <div class="absolute top-0 right-0 bg-rose-500 text-white text-[8px] font-bold px-1.5 py-0.5 rounded-bl-lg">CRITICAL</div>
+                                <div class="flex justify-between items-center mb-1">
+                                    <div class="font-bold text-[11px] text-slate-800 group-hover:text-purple-600 transition-colors">Brand: AURA <i class="fa-solid fa-circle-check text-blue-500 text-[9px] ml-0.5"></i></div>
+                                </div>
+                                <div class="text-[9px] text-slate-600 mb-1.5">Top SKU: Aura Serum 30ml</div>
+                                <div class="flex items-center gap-2 text-[9px]">
+                                    <div class="flex-1 bg-slate-100 rounded-full h-1.5"><div class="bg-rose-500 h-1.5 rounded-full" style="width: 18%"></div></div>
+                                    <span class="text-rose-600 font-bold w-6 text-right">18%</span>
+                                </div>
+                                <div class="mt-2 text-[9px] text-purple-700 bg-purple-50 p-1.5 rounded-lg border border-purple-100 flex items-center justify-between">
+                                    <span><i class="fa-solid fa-wand-magic-sparkles mr-1"></i> AI: Upsell Sunscreen</span>
+                                    <i class="fa-solid fa-arrow-right text-purple-400 group-hover:translate-x-1 transition-transform"></i>
+                                </div>
+                            </div>
+
+                            <!-- Client 2: Bella (Healthy) -->
+                            <div class="bg-white p-2.5 rounded-xl shadow-sm border border-slate-200 mb-2 opacity-75">
+                                <div class="flex justify-between items-center mb-1">
+                                    <div class="font-bold text-[11px] text-slate-800">Brand: BELLA</div>
+                                    <div class="text-[8px] bg-emerald-100 text-emerald-600 px-1.5 rounded font-bold">Healthy</div>
+                                </div>
+                                <div class="text-[9px] text-slate-600 mb-1.5">Top SKU: Glow Cream 50g</div>
+                                <div class="flex items-center gap-2 text-[9px]">
+                                    <div class="flex-1 bg-slate-100 rounded-full h-1.5"><div class="bg-emerald-500 h-1.5 rounded-full" style="width: 65%"></div></div>
+                                    <span class="text-emerald-600 font-bold w-6 text-right">65%</span>
+                                </div>
+                            </div>
+
+                            <!-- Client 3: Chris (Warning) -->
+                            <div class="bg-white p-2.5 rounded-xl shadow-sm border border-slate-200 mb-2 opacity-75">
+                                <div class="flex justify-between items-center mb-1">
+                                    <div class="font-bold text-[11px] text-slate-800">Brand: CHRIS</div>
+                                    <div class="text-[8px] bg-amber-100 text-amber-600 px-1.5 rounded font-bold">Warning</div>
+                                </div>
+                                <div class="text-[9px] text-slate-600 mb-1.5">Top SKU: Detox Mask 15ml</div>
+                                <div class="flex items-center gap-2 text-[9px]">
+                                    <div class="flex-1 bg-slate-100 rounded-full h-1.5"><div class="bg-amber-500 h-1.5 rounded-full" style="width: 32%"></div></div>
+                                    <span class="text-amber-600 font-bold w-6 text-right">32%</span>
+                                </div>
+                            </div>
                         </div>
-                        <button class="w-full bg-purple-600 text-white text-xs font-bold py-3.5 rounded-xl hover:bg-purple-700 transition shadow-md flex items-center justify-center shrink-0" onclick="window.showSimLoading('Executing Marketing Automation...', () => window.triggerModal(7))">
-                            <i class="fa-solid fa-bullseye mr-2"></i> ยิงแคมเปญเสนอสูตรใหม่ & กระตุ้น Re-order
-                        </button>
+
+                        <!-- ================= DETAIL VIEW (Hidden by default) ================= -->
+                        <div id="s7-detail" class="pt-11 flex-1 overflow-y-auto custom-scrollbar flex flex-col w-full hidden transition-all duration-300 relative bg-slate-50">
+                            <!-- Back button -->
+                            <div class="px-3 pb-2 shrink-0">
+                                <button onclick="document.getElementById('s7-detail').classList.add('hidden'); document.getElementById('s7-list').classList.remove('hidden');" class="text-[10px] text-slate-500 hover:text-purple-600 font-bold bg-white px-2 py-1 rounded-md border border-slate-200 shadow-sm transition-colors"><i class="fa-solid fa-chevron-left mr-1"></i> Back to Dashboard</button>
+                            </div>
+                            
+                            <div class="px-3 flex-1 flex flex-col pb-2">
+                                <!-- Profile Header -->
+                                <div class="flex justify-between items-end mb-3 shrink-0 bg-white p-2.5 rounded-xl shadow-sm border border-slate-200">
+                                    <div>
+                                        <div class="text-xs font-bold text-slate-800">Brand: AURA <i class="fa-solid fa-circle-check text-blue-500"></i></div>
+                                        <div class="text-[9px] text-slate-500 mt-0.5"><i class="fa-regular fa-user mr-1"></i> Contact: Khun Aura</div>
+                                    </div>
+                                    <div class="text-right">
+                                        <div class="text-[8px] bg-gradient-to-r from-amber-200 to-amber-400 text-amber-900 px-1.5 py-0.5 rounded font-bold mb-0.5">VIP Partner</div>
+                                        <div class="text-[9px] text-slate-500">LTV: <span class="font-bold text-emerald-600">High</span></div>
+                                    </div>
+                                </div>
+
+                                <!-- Widgets Grid -->
+                                <div class="grid grid-cols-2 gap-2 mb-2 shrink-0">
+                                    <!-- Stock Widget -->
+                                    <div class="bg-white p-2.5 rounded-xl shadow-sm border border-rose-200 flex flex-col justify-center relative overflow-hidden">
+                                        <div class="text-[9px] text-slate-400 uppercase font-bold mb-1.5"><i class="fa-solid fa-cubes text-purple-500 mr-1"></i> Inventory Risk</div>
+                                        <div class="flex items-end gap-1 mb-1.5">
+                                            <div class="text-xl font-bold text-rose-500 leading-none">18%</div>
+                                            <div class="text-[8px] text-slate-500 pb-0.5">Left</div>
+                                        </div>
+                                        <div class="w-full bg-slate-100 rounded-full h-1.5 mb-1.5"><div class="bg-rose-500 h-1.5 rounded-full" style="width: 18%"></div></div>
+                                        <div class="text-[8px] text-slate-500 leading-tight">Run out in 21 Days<br/><span class="text-rose-400 font-medium">(Lead time: 30D)</span></div>
+                                    </div>
+
+                                    <!-- AI Insight Widget -->
+                                    <div class="bg-gradient-to-br from-purple-600 to-indigo-700 p-2.5 rounded-xl shadow-sm text-white relative overflow-hidden flex flex-col justify-center">
+                                        <i class="fa-solid fa-sparkles absolute -right-2 -bottom-2 text-4xl opacity-20"></i>
+                                        <div class="text-[9px] text-purple-200 uppercase font-bold mb-1.5"><i class="fa-solid fa-chart-line mr-1"></i> AI Trend Upsell</div>
+                                        <div class="text-xs font-bold mb-1 text-amber-300">"กันแดดเนื้อน้ำ"</div>
+                                        <div class="text-[8px] text-purple-100 leading-tight mt-auto">
+                                            +45% search volume<br/>matching Aura's audience.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Premium Support Services Card -->
+                                <div class="bg-white p-2.5 rounded-xl shadow-sm border border-slate-200 shrink-0 mb-1">
+                                    <div class="text-[9.5px] font-bold text-slate-800 border-b border-slate-100 pb-1.5 mb-2"><i class="fa-solid fa-gem text-amber-500 mr-1"></i> Marketing Assets Auto-Gen</div>
+                                    <div class="space-y-1.5 flex-1 justify-center flex flex-col">
+                                        <div class="flex items-center justify-between text-[9px] bg-slate-50 p-1.5 rounded border border-slate-100">
+                                            <div class="flex items-center gap-1.5"><i class="fa-solid fa-file-pdf text-rose-500"></i> <span class="text-slate-700">FDA Approved Claims</span></div>
+                                            <span class="bg-emerald-100 text-emerald-600 text-[8px] px-1.5 py-0.5 rounded font-bold">Ready</span>
+                                        </div>
+                                        <div class="flex items-center justify-between text-[9px] bg-slate-50 p-1.5 rounded border border-slate-100">
+                                            <div class="flex items-center gap-1.5"><i class="fa-solid fa-cube text-blue-500"></i> <span class="text-slate-700">3D Product Renderings</span></div>
+                                            <span class="bg-emerald-100 text-emerald-600 text-[8px] px-1.5 py-0.5 rounded font-bold">Ready</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Sticky Action Button -->
+                            <div class="p-2 bg-white border-t border-slate-200 shrink-0 mt-auto shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+                                <button class="w-full bg-purple-600 text-white text-[11px] font-bold py-2.5 rounded-xl hover:bg-purple-700 transition shadow-md flex items-center justify-center" onclick="window.showSimLoading('Analyzing Dashboard Data...', () => window.triggerModal(7))">
+                                    <i class="fa-solid fa-handshake-angle mr-2"></i> เข้าพบลูกค้าด่วน: เสนอผลิตซ้ำ & สินค้าใหม่
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 `,
-                pluginDetail: "<div class='biz-step'><strong>RFM Segmentation:</strong> จัดกลุ่มลูกค้าอัตโนมัติตาม Recency (ซื้อล่าสุดเมื่อไหร่), Frequency (บ่อยแค่ไหน), Monetary (ยอดเงินเท่าไหร่) เพื่อดูแลแบบ VIP</div><div class='biz-step'><strong>Predictive Demand AI:</strong> คำนวณความเร็วในการขายและแจ้งเตือนจุดสั่งซื้อซ้ำ (Re-order Point) ก่อนของขาดตลาด</div><div class='biz-step'><strong>Next Best Action (NBA):</strong> AI แนะนำให้เซลส์รู้ว่าควรโทรหาลูกค้าคนนี้เพื่อเสนอสินค้า 'ตัวถัดไป' คืออะไร (เช่น เสนอกันแดด เพราะเคยถามไว้ในแชทครั้งแรกสุด)</div>",
-                reduceWork: "เปลี่ยนรูปแบบการทำงานจากการ 'รอรับออเดอร์' เป็น 'การบริการเชิงรุก' (Proactive) สร้างความว้าวและความภักดีระยะยาว (Retention) อย่างมืออาชีพ"
+                pluginDetail: "<div class='biz-step'><strong>Predictive Reorder AI:</strong> ระบบคำนวณยอดขายเทียบกับ Lead Time การผลิต เพื่อแจ้งเตือนให้ Key Account Manager ทราบว่า <em>'ต้องโทรหาลูกค้าวันนี้'</em> เพื่อให้สั่งผลิตล็อตใหม่ทันก่อนของขาดตลาด</div><div class='biz-step'><strong>Data-Driven NPD (New Product Development):</strong> ใช้ข้อมูล Insight ตลาด เสนอสูตรสินค้าตัวถัดไป (Cross-sell) ที่ตรงกับพฤติกรรมผู้บริโภคของแบรนด์นั้นๆ เพื่อให้ลูกค้าขยายธุรกิจต่อได้ทันที</div><div class='biz-step'><strong>Premium Marketing Automation:</strong> ระบบดึงข้อมูลจาก R&D มาสร้างเป็นเครื่องมือการตลาดให้แบรนด์อัตโนมัติ (เช่น ข้อมูลเจาะลึกสารสกัด, ภาพ 3D, ข้อความเคลมที่ถูกกฎหมาย) สนับสนุนให้ลูกค้าทำการตลาดง่ายขึ้น</div>",
+                reduceWork: "เปลี่ยนจากการ 'นั่งรอรับออเดอร์ (Reactive)' เป็นการ 'บริหารการเติบโตให้ลูกค้า (Proactive)' ช่วยรักษาฐานลูกค้า (Retention) ลดการสูญเสียรายได้จากภาวะของขาดสต็อก และสร้างความประทับใจระดับ VIP จนลูกค้าไม่อยากย้ายโรงงานไปไหน"
             }
         };
 
@@ -898,15 +998,25 @@
             else if (stageId === 7) {
                 body = `
                     <div class="text-center">
-                        <i class="fa-solid fa-bullseye text-6xl text-purple-500 mb-4 drop-shadow-md"></i>
-                        <h3 class="font-bold text-slate-800 text-lg mb-2">Proactive Engagement Executed</h3>
-                        <div class="bg-purple-50 border border-purple-200 rounded-lg p-4 text-left text-xs text-slate-700">
-                            <p class="mb-3"><i class="fa-solid fa-envelope text-purple-500 mr-2"></i><strong>Auto-Email Sent:</strong> "Your Serum stock is running low. Re-order now to secure production queue."</p>
-                            <p><i class="fa-solid fa-phone text-purple-500 mr-2"></i><strong>Task for KAM:</strong> Call Khun Aura to discuss Q3 new product line expansion (Sunscreen).</p>
+                        <div class="relative inline-block">
+                            <i class="fa-solid fa-handshake text-6xl text-purple-500 mb-4 drop-shadow-md"></i>
+                            <i class="fa-solid fa-star text-2xl text-amber-400 absolute -top-2 -right-4 animate-pulse"></i>
+                        </div>
+                        <h3 class="font-bold text-slate-800 text-lg mb-2">Strategic Partnership Secured</h3>
+                        
+                        <div class="bg-purple-50 border border-purple-200 rounded-xl p-4 text-left text-xs text-slate-700 shadow-sm">
+                            <div class="text-[10px] font-bold text-purple-800 uppercase border-b border-purple-200 pb-1 mb-2">Action Taken by KAM:</div>
+                            <p class="mb-2"><i class="fa-solid fa-square-check text-emerald-500 mr-2"></i><strong>Re-order Saved:</strong> ลูกค้าเซ็นใบสั่งผลิตเซรั่ม ล็อตที่ 2 (ป้องกันของขาดสต็อกสำเร็จ)</p>
+                            <p class="mb-2"><i class="fa-solid fa-square-check text-emerald-500 mr-2"></i><strong>Upsell Success:</strong> ลูกค้าตกลงเปิดโปรเจกต์ "กันแดดเนื้อน้ำ" สำหรับ Q3</p>
+                            <p class="mb-2"><i class="fa-solid fa-square-check text-emerald-500 mr-2"></i><strong>Value Added:</strong> ส่งมอบ 3D Packshot และ Content เคลมสารสกัด ให้ทีมการตลาดของลูกค้า</p>
+                        </div>
+                        
+                        <div class="mt-4 bg-emerald-100 text-emerald-800 border border-emerald-300 p-2 rounded-lg font-bold text-[11px]">
+                            <i class="fa-solid fa-chart-line mr-1"></i> Customer Lifetime Value (CLV) Increased!
                         </div>
                     </div>`;
-                action = `<button class="w-full bg-slate-800 text-white text-xs font-bold py-3.5 rounded-xl hover:bg-slate-900 transition shadow-md" onclick="window.closeSimModal(); window.selectAppModule(1)"><i class="fa-solid fa-rotate-right mr-2"></i> กลับไปเริ่มต้น Cycle ใหม่อีกครั้ง</button>`;
-                window.openSimModal('BI & Customer Retention', body, action);
+                action = `<button class="w-full bg-slate-800 text-white text-xs font-bold py-3.5 rounded-xl hover:bg-slate-900 transition shadow-md" onclick="window.closeSimModal(); window.selectAppModule(1)"><i class="fa-solid fa-rotate-right mr-2"></i> กลับไปเริ่มต้น Cycle วงจรใหม่</button>`;
+                window.openSimModal('Proactive Growth & Loyalty', body, action);
             }
         };
 
